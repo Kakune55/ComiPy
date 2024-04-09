@@ -52,11 +52,21 @@ def api():  # 接口
     return abort(400)
 
 
-@app.route("/api/img")
-def img():  # 图片接口
+@app.route("/api/img/<bookid>/<index>")
+def img(bookid, index):  # 图片接口
     if request.cookies.get("islogin") is None:
         return abort(403)
-    return "Hello World"
+    if db.searchByid(bookid) == "":
+        return jsonify({'message': 'No ZIP file part'}), 400
+    # 设置响应类型为图片
+    data, filename = file.raedZip(bookid,index)
+    if data is str:
+        return data
+    response = make_response(data) #读取文件
+    response.headers.set('Content-Type', 'image/{}'.format(filename.split('.')[-1]))
+    response.headers.set('Content-Disposition', 'inline', filename=filename)
+    
+    return response
 
 
 @app.route("/book/<bookid>")

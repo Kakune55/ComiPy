@@ -1,8 +1,9 @@
-import shutil, os ,configparser
+import shutil, os, configparser, zipfile
 import db
 
 config = configparser.ConfigParser()
 config.read("./conf/app.ini")
+
 
 def init():
     try:
@@ -12,9 +13,48 @@ def init():
     except:
         pass
 
+
 def auotLoadFile():
     fileList = os.listdir(config.get("file", "inputdir"))
     for item in fileList:
-        db.newFile(item)
-        shutil.move(config.get("file", "inputdir")+"/"+item, config.get("file", "storedir")+"/"+item)
-        print("已添加 "+item)
+        if zipfile.is_zipfile(
+            config.get("file", "inputdir") + "/" + item
+        ):  # 判断是否为压缩包
+            db.newFile(item)  # 添加数据库记录 移动到存储
+            shutil.move(
+                config.get("file", "inputdir") + "/" + item,
+                config.get("file", "storedir") + "/" + item,
+            )
+            print("已添加 " + item)
+        else:
+            print("不符合条件 " + item)
+
+
+def raedZip(bookid: str, index: int):
+    bookinfo = db.searchByid(bookid)
+    zippath = config.get("file", "storedir") + "/" + bookinfo[0][2]
+
+    try:
+        # 创建一个ZipFile对象
+        with zipfile.ZipFile(zippath, "r") as zip_ref:
+            # 获取图片文件列表
+            image_files = [
+                file
+                for file in zip_ref.namelist()
+                if file.lower().endswith((".png", ".jpg", ".jpeg"))
+            ]
+
+            if not image_files:
+                return "not imgfile in zip", ""
+
+            # 假设我们只提取图片文件
+            image_filename = image_files[int(index)]
+
+            # 读取图片数据
+            image_data = zip_ref.read(image_filename)
+            return image_data, image_filename
+
+    except zipfile.BadZipFile:  # 异常处理
+        return "Bad ZipFile", ""
+    except Exception as e:
+        return str(e), ""

@@ -35,8 +35,9 @@ def searchByid(id: str):
     conn.close()
     return out
 
+
 # 查找文件信息
-def searchByid(filename: str):
+def searchByFilename(filename: str):
     conn = getConn()
     c = conn.cursor()
     cursor = c.execute("SELECT * FROM Metadata WHERE filename = ?", (filename,))
@@ -65,13 +66,17 @@ def newFile(filename: str):
     conn.close()
     return suuid
 
+
 # 获取文件元数据
-def getMetadata(form:int,num:int):
+def getMetadata(form: int, num: int):
     conn = getConn()
     c = conn.cursor()
-    cursor = c.execute("SELECT * FROM Metadata ORDER BY num desc LIMIT ?, ?",(form, num))
+    cursor = c.execute(
+        "SELECT * FROM Metadata ORDER BY num desc LIMIT ?, ?", (form, num)
+    )
     out = []
     for row in cursor:
         out.append(list(row))
     conn.close()
     return out
+
