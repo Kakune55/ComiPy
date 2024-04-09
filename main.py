@@ -37,7 +37,7 @@ def login():  # 登录页面
 def overview():  # 概览
     if request.cookies.get("islogin") is None:
         return redirect("/")
-    return config.get("server", "port")
+    return render_template("overview.html")
 
 
 @app.route("/api/info")
@@ -65,7 +65,6 @@ def img(bookid, index):  # 图片接口
     response = make_response(data) #读取文件
     response.headers.set('Content-Type', 'image/{}'.format(filename.split('.')[-1]))
     response.headers.set('Content-Disposition', 'inline', filename=filename)
-    
     return response
 
 
