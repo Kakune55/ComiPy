@@ -1,3 +1,2 @@
 shortuuid
-zipfile
 flask
