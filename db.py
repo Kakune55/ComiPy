@@ -16,7 +16,8 @@ def init():
     CREATE TABLE IF NOT EXISTS Metadata  (
     num INTEGER PRIMARY KEY AUTOINCREMENT,
     id TEXT NOT NULL,
-    filename TEXT NOT NULL
+    filename TEXT NOT NULL,
+    pagenumber INT NOT NULL
     );
     """
     )
@@ -49,18 +50,18 @@ def searchByFilename(filename: str):
 
 
 # 在数据库中添加一个新的文件记录
-def newFile(filename: str):
+def newFile(filename: str, pagenumber:int):
     suuid = shortuuid.random(8)
     conn = getConn()
     c = conn.cursor()
     c.execute(
         """
     INSERT INTO Metadata 
-    (id, filename) 
+    (id, filename, pagenumber) 
     VALUES 
-    (?, ?);
+    (?, ?, ?);
     """,
-        (suuid, filename),
+        (suuid, filename, pagenumber),
     )
     conn.commit()
     conn.close()

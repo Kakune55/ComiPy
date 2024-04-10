@@ -60,8 +60,8 @@ def img(bookid, index):  # 图片接口
         return jsonify({'message': 'No ZIP file part'}), 400
     # 设置响应类型为图片
     data, filename = file.raedZip(bookid,index)
-    if data is str:
-        return data
+    if isinstance(data, str):
+        abort(404)
     response = make_response(data) #读取文件
     response.headers.set('Content-Type', 'image/{}'.format(filename.split('.')[-1]))
     response.headers.set('Content-Disposition', 'inline', filename=filename)
@@ -72,7 +72,7 @@ def img(bookid, index):  # 图片接口
 def book(bookid):  # 接口
     if request.cookies.get("islogin") is None:
         return abort(403)
-    return bookid
+    return render_template("view.html",data = bookid)
 
 
 @app.route("/view/<bookid>")

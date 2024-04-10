@@ -20,7 +20,8 @@ def auotLoadFile():
         if zipfile.is_zipfile(
             config.get("file", "inputdir") + "/" + item
         ):  # 判断是否为压缩包
-            db.newFile(item)  # 添加数据库记录 移动到存储
+            with zipfile.ZipFile(config.get("file", "inputdir") + "/" + item, "r") as zip_ref:
+                db.newFile(item, len(zip_ref.namelist()))  # 添加数据库记录 移动到存储
             shutil.move(
                 config.get("file", "inputdir") + "/" + item,
                 config.get("file", "storedir") + "/" + item,
@@ -46,6 +47,9 @@ def raedZip(bookid: str, index: int):
 
             if not image_files:
                 return "not imgfile in zip", ""
+            
+            if int(index) > len(image_files):
+                return "404 not found", ""
 
             # 假设我们只提取图片文件
             image_filename = image_files[int(index)]

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漫画详情页</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        #comic-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .comic-image {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div id="comic-container"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const comicId = getComicIdFromURL();
+        if (comicId) {
+            displayComic(comicId);
+        } else {
+            console.error('No comic ID found in URL');
+        }
+    });
+
+    // 从当前URL中获取漫画ID
+    function getComicIdFromURL() {
+        const urlParts = window.location.pathname.split('/');
+        return urlParts[2]; // 第三部分是漫画ID
+    }
+
+    // 显示漫画
+    function displayComic(comicId) {
+        let currentImageIndex = 1;
+        const comicContainer = document.getElementById('comic-container');
+
+        function loadNextImage() {
+            const imageUrl = `/api/img/${comicId}/${currentImageIndex}`;
+            fetch(imageUrl)
+                .then(response => {
+                    if (response.ok) {
+                        const img = document.createElement('img');
+                        img.src = imageUrl;
+                        img.classList.add('comic-image');
+                        comicContainer.appendChild(img);
+                        currentImageIndex++;
+                        // 添加延迟，以控制加载速度
+                        setTimeout(loadNextImage, 1000);
+                    } else {
+                        console.error('Error loading image:', response.statusText);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading image:', error);
+                });
+        }
+
+        // 加载第一张图片
+        loadNextImage();
+    }
+</script>
+</body>
+</html>
