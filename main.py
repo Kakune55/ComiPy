@@ -82,6 +82,17 @@ def view(bookid):  # 接口
     return bookid
 
 
+@app.route('/upload', methods=["GET", "POST"]) #文件上传
+def upload_file():
+    if request.method == "GET":
+        return render_template("upload.html")
+    uploaded_file = request.files['file']
+    if uploaded_file.filename != '':
+        uploaded_file.save( config.get("file", "inputdir") + "/" + uploaded_file.filename)
+    file.auotLoadFile()
+    return redirect("/")
+
+
 if __name__ == "__main__":
     appinit()
     app.run(
