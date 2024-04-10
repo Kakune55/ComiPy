@@ -86,9 +86,10 @@ def view(bookid):  # 接口
 def upload_file():
     if request.method == "GET":
         return render_template("upload.html")
-    uploaded_file = request.files['file']
-    if uploaded_file.filename != '':
-        uploaded_file.save( config.get("file", "inputdir") + "/" + uploaded_file.filename)
+    uploaded_file = request.files.getlist('files[]')  # 获取上传的文件列表
+    for fileitem in uploaded_file:
+        if fileitem.filename != '':
+            fileitem.save(config.get("file", "inputdir") + "/" + fileitem.filename)
     file.auotLoadFile()
     return redirect("/")
 
