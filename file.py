@@ -59,6 +59,7 @@ def raedZip(bookid: str, index: int):
 
             # 读取图片数据
             image_data = zip_ref.read(image_filename)
+            zip_ref.close()
             return image_data, image_filename
 
     except zipfile.BadZipFile:  # 异常处理
@@ -74,6 +75,7 @@ def thumbnail(input,size=(400,800)):
     im.thumbnail(size)
     output_io = io.BytesIO()
     im.save(output_io,format='WEBP')
+    im.close()
     output_io.seek(0)
     return output_io
 
@@ -83,6 +85,7 @@ def imageToWebP(input):
     im = im.convert('RGB')
     output_io = io.BytesIO()
     im.save(output_io,format='WEBP')
+    im.close()
     output_io.seek(0)
     return output_io
     

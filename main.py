@@ -1,4 +1,4 @@
-import configparser, os
+import configparser, gc
 import db, file
 from flask import *
 
@@ -68,16 +68,17 @@ def img(bookid, index):  # 图片接口
         return abort(404)
     # 设置响应类型为图片
     data, filename = file.raedZip(bookid,index)
+    if isinstance(data, str):
+        abort(404)
     if request.args.get("mini") == "yes":
         data = file.thumbnail(data)
     else:
         data = file.imageToWebP(data)
-    if isinstance(data, str):
-        abort(404)
     response = make_response(data) #读取文件
     del data
     response.headers.set('Content-Type', 'image/Webp')
     response.headers.set('Content-Disposition', 'inline', filename=filename)
+    gc.collect()
     return response
 
 
@@ -85,7 +86,10 @@ def img(bookid, index):  # 图片接口
 def book(bookid):  # 接口
     if request.cookies.get("islogin") is None:
         return abort(403)
-    return render_template("view.html",data = bookid)
+    data = db.searchByid(bookid)
+    if data == "":
+        return abort(404)
+    return render_template("view.html",id = bookid , index = range(1,data[0][3]))
 
 
 @app.route("/view/<bookid>")
