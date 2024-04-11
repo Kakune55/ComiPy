@@ -45,10 +45,6 @@
       cursor: pointer;
     }
 
-    .loading {
-      display: none;
-    }
-
     #imageContainer {
       display: none;
       justify-content: center;
@@ -73,18 +69,18 @@
   <div id="gallery">
     {% for item in list %}
     <div class="image-container">
-      <img src="/api/img/{{ item[1] }}/1" class="image" onclick="linkjump('{{ item[1] }}')" />
+      <img src="/api/img/{{ item[1] }}/1?mini=yes" class="image" onclick="linkjump('{{ item[1] }}')" />
       <span>{{ item[2] }}</span>
     </div>
     {% endfor %}
   </div>
   <div style="display:flex;justify-content: center; align-items:center;">
-    <div class="btn-group"" role=" toolbar" aria-label="Toolbar with button groups">
+    <div class="btn-group" role=" toolbar" aria-label="Toolbar with button groups">
       {% for item in lastPageList %}
       <button type="button" class="btn btn-primary" onclick="switchPage('{{item}}')">{{item}}</button>
       {% endfor %}
     </div>
-    <div class="btn-group"" role=" group" aria-label="Second group">
+    <div class="btn-group" role=" group" aria-label="Second group">
       <button type="button" class="btn btn-info">{{pagenow}}</button>
     </div>
     <div class="btn-group" role="group" aria-label="Third group">

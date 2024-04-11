@@ -65,13 +65,18 @@ def img(bookid, index):  # 图片接口
     if request.cookies.get("islogin") is None:
         return abort(403)
     if db.searchByid(bookid) == "":
-        return jsonify({'message': 'No ZIP file part'}), 400
+        return abort(404)
     # 设置响应类型为图片
     data, filename = file.raedZip(bookid,index)
+    if request.args.get("mini") == "yes":
+        data = file.thumbnail(data)
+    else:
+        data = file.imageToWebP(data)
     if isinstance(data, str):
         abort(404)
     response = make_response(data) #读取文件
-    response.headers.set('Content-Type', 'image/{}'.format(filename.split('.')[-1]))
+    del data
+    response.headers.set('Content-Type', 'image/Webp')
     response.headers.set('Content-Disposition', 'inline', filename=filename)
     return response
 

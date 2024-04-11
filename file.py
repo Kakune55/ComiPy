@@ -1,5 +1,6 @@
-import shutil, os, configparser, zipfile
+import shutil, os, configparser, zipfile, io
 import db
+from PIL import Image
 
 config = configparser.ConfigParser()
 config.read("./conf/app.ini")
@@ -20,7 +21,9 @@ def auotLoadFile():
         if zipfile.is_zipfile(
             config.get("file", "inputdir") + "/" + item
         ):  # 判断是否为压缩包
-            with zipfile.ZipFile(config.get("file", "inputdir") + "/" + item, "r") as zip_ref:
+            with zipfile.ZipFile(
+                config.get("file", "inputdir") + "/" + item, "r"
+            ) as zip_ref:
                 db.newFile(item, len(zip_ref.namelist()))  # 添加数据库记录 移动到存储
             shutil.move(
                 config.get("file", "inputdir") + "/" + item,
@@ -47,7 +50,7 @@ def raedZip(bookid: str, index: int):
 
             if not image_files:
                 return "not imgfile in zip", ""
-            
+
             if int(index) > len(image_files):
                 return "404 not found", ""
 
@@ -62,3 +65,25 @@ def raedZip(bookid: str, index: int):
         return "Bad ZipFile", ""
     except Exception as e:
         return str(e), ""
+
+
+def thumbnail(input,size=(400,800)):
+    im = Image.open(io.BytesIO(input))
+    del input
+    im = im.convert('RGB')
+    im.thumbnail(size)
+    output_io = io.BytesIO()
+    im.save(output_io,format='WEBP')
+    output_io.seek(0)
+    return output_io
+
+def imageToWebP(input):
+    im = Image.open(io.BytesIO(input))
+    del input
+    im = im.convert('RGB')
+    output_io = io.BytesIO()
+    im.save(output_io,format='WEBP')
+    output_io.seek(0)
+    return output_io
+    
+    
