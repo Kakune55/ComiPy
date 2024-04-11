@@ -20,36 +20,44 @@ def appinit():
 def login():  # 登录页面
     if request.method == "GET":
         if request.cookies.get("islogin") is not None:
-            return redirect("/overview")
+            return redirect("/overview/1")
         return render_template("login.html")
     elif request.method == "POST":
         if request.form["username"] == config.get("user", "username") and request.form[
             "password"
         ] == config.get("user", "password"):
-            resp = make_response(redirect("/overview"))
+            resp = make_response(redirect("/overview/1"))
             resp.set_cookie("islogin", "True")
             return resp
         else:
             return redirect("/")
 
 
-@app.route("/overview")
-def overview():  # 概览
+
+@app.route("/overview/<page>")
+def overview(page):  # 概览
+    page = int(page)
     if request.cookies.get("islogin") is None:
         return redirect("/")
-    return render_template("overview.html")
+    metaDataList = db.getMetadata((page - 1) * 20, page * 20)
+    if page <= 3:
+        lastPageList = range(1,page)
+    else:
+        lastPageList = range(page-3,page)
+    nextPageList = range(page+1,page+4)
+    return render_template("overview.html",list=metaDataList,lastPageList=lastPageList,pagenow=page,nextPageList=nextPageList)
 
 
-@app.route("/api/info")
-def api():  # 接口
-    if request.cookies.get("islogin") is None:
-        return abort(403)
-    func = request.args.get("func")
-    if func == "bookname" and request.args.get("page") is not None:
-        page = int(request.args.get("page"))
-        return db.getMetadata((page - 1) * 20, page * 20)
+# @app.route("/api/info") 暂时弃用
+# def api():  # 接口
+#     if request.cookies.get("islogin") is None:
+#         return abort(403)
+#     func = request.args.get("func")
+#     if func == "bookname" and request.args.get("page") is not None:
+#         page = int(request.args.get("page"))
+#         return db.getMetadata((page - 1) * 20, page * 20)
 
-    return abort(400)
+#     return abort(400)
 
 
 @app.route("/api/img/<bookid>/<index>")
