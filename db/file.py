@@ -1,33 +1,10 @@
-import sqlite3, configparser, shortuuid
-
-config = configparser.ConfigParser()
-config.read("./conf/app.ini")
-
-
-def getConn():
-    return sqlite3.connect(config.get("database", "path"))
-
-
-def init():
-    conn = getConn()
-    c = conn.cursor()
-    c.execute(
-        """
-    CREATE TABLE IF NOT EXISTS Metadata  (
-    num INTEGER PRIMARY KEY AUTOINCREMENT,
-    id TEXT NOT NULL,
-    filename TEXT NOT NULL,
-    pagenumber INT NOT NULL
-    );
-    """
-    )
-    conn.commit()
-    conn.close()
+import shortuuid
+import db.util as util
 
 
 # 查找文件信息
 def searchByid(id: str):
-    conn = getConn()
+    conn = util.getConn()
     c = conn.cursor()
     cursor = c.execute("SELECT * FROM Metadata WHERE id = ?", (id,))
     out = []
@@ -38,8 +15,8 @@ def searchByid(id: str):
 
 
 # 查找文件信息
-def searchByFilename(filename: str):
-    conn = getConn()
+def searchByname(filename: str):
+    conn = util.getConn()
     c = conn.cursor()
     cursor = c.execute("SELECT * FROM Metadata WHERE filename = ?", (filename,))
     out = []
@@ -50,18 +27,18 @@ def searchByFilename(filename: str):
 
 
 # 在数据库中添加一个新的文件记录
-def newFile(filename: str, pagenumber:int):
+def new(filename: str):
     suuid = shortuuid.random(8)
-    conn = getConn()
+    conn = util.getConn()
     c = conn.cursor()
     c.execute(
         """
     INSERT INTO Metadata 
-    (id, filename, pagenumber) 
+    (id, filename) 
     VALUES 
     (?, ?, ?);
     """,
-        (suuid, filename, pagenumber),
+        (suuid, filename),
     )
     conn.commit()
     conn.close()
@@ -70,7 +47,7 @@ def newFile(filename: str, pagenumber:int):
 
 # 获取文件元数据
 def getMetadata(form: int, num: int):
-    conn = getConn()
+    conn = util.getConn()
     c = conn.cursor()
     cursor = c.execute(
         "SELECT * FROM Metadata ORDER BY num desc LIMIT ?, ?", (form, num)
@@ -80,4 +57,3 @@ def getMetadata(form: int, num: int):
         out.append(list(row))
     conn.close()
     return out
-

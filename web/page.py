@@ -1,7 +1,7 @@
 from flask import *
 from flask import Blueprint
 import configparser
-import db, file
+import db.file , file
 
 page_bp = Blueprint("page_bp", __name__)
 
@@ -14,7 +14,7 @@ def overview(page):  # 概览
     page = int(page)
     if request.cookies.get("islogin") is None:
         return redirect("/")
-    metaDataList = db.getMetadata((page - 1) * 20, page * 20)
+    metaDataList = db.file.getMetadata((page - 1) * 20, page * 20)
     if page <= 3:
         lastPageList = range(1, page)
     else:
@@ -33,7 +33,7 @@ def overview(page):  # 概览
 def book(bookid):  # 接口
     if request.cookies.get("islogin") is None:
         return abort(403)
-    data = db.searchByid(bookid)
+    data = db.file.searchByid(bookid)
     if data == "":
         return abort(404)
     return render_template("view.html", id=bookid, index=range(1, data[0][3]))

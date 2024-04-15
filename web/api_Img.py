@@ -1,6 +1,6 @@
 from flask import *
 from flask import Blueprint
-import db, file
+import db.file , file
 
 api_Img_bp = Blueprint("api_Img_bp", __name__)
 
@@ -9,7 +9,7 @@ api_Img_bp = Blueprint("api_Img_bp", __name__)
 def img(bookid, index):  # 图片接口
     if request.cookies.get("islogin") is None:
         return abort(403)
-    if db.searchByid(bookid) == "":
+    if db.file.searchByid(bookid) == "":
         return abort(404)
     # 设置响应类型为图片
     data, filename = file.raedZip(bookid, index)

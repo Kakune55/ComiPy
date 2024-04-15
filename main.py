@@ -1,5 +1,6 @@
 import configparser
-import db, file
+import db.util
+import db.file, file
 from flask import *
 
 from web.api_Img import api_Img_bp
@@ -13,7 +14,7 @@ config.read("./conf/app.ini")
 
 def appinit():
     file.init()
-    db.init()
+    db.util.init()
     file.auotLoadFile()
 
 
