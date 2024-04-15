@@ -1,6 +1,6 @@
 from flask import *
 from flask import Blueprint
-import db.file , file
+import db.file , file, gc
 
 api_Img_bp = Blueprint("api_Img_bp", __name__)
 
@@ -23,4 +23,5 @@ def img(bookid, index):  # 图片接口
     del data
     response.headers.set("Content-Type", "image/Webp")
     response.headers.set("Content-Disposition", "inline", filename=filename)
+    gc.collect()
     return response
