@@ -1,4 +1,4 @@
-import shortuuid
+import shortuuid, time
 import db.util as util
 
 
@@ -27,18 +27,18 @@ def searchByname(filename: str):
 
 
 # 在数据库中添加一个新的文件记录
-def new(filename: str):
+def new(filename: str, pagenumber:int):
     suuid = shortuuid.random(8)
     conn = util.getConn()
     c = conn.cursor()
     c.execute(
         """
     INSERT INTO Metadata 
-    (id, filename) 
+    (id, filename, pagenumber, inputtime) 
     VALUES 
-    (?, ?, ?);
+    (?, ?, ?, ?);
     """,
-        (suuid, filename),
+        (suuid, filename, pagenumber, int(time.time())),
     )
     conn.commit()
     conn.close()

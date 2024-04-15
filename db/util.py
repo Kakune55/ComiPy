@@ -16,7 +16,9 @@ def init():
     CREATE TABLE IF NOT EXISTS Metadata  (
     num INTEGER PRIMARY KEY AUTOINCREMENT,
     id TEXT NOT NULL,
-    filename TEXT NOT NULL
+    filename TEXT NOT NULL,
+    pagenumber INT NOT NULL,
+    inputtime INT NOT NULL
     );
     """
     )

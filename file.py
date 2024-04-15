@@ -24,7 +24,7 @@ def auotLoadFile():
             with zipfile.ZipFile(
                 config.get("file", "inputdir") + "/" + item, "r"
             ) as zip_ref:
-                db.file.new(item)  # 添加数据库记录 移动到存储
+                db.file.new(item, len(zip_ref.namelist()))  # 添加数据库记录 移动到存储
             shutil.move(
                 config.get("file", "inputdir") + "/" + item,
                 config.get("file", "storedir") + "/" + item,

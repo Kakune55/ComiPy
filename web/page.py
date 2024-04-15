@@ -1,7 +1,7 @@
 from flask import *
 from flask import Blueprint
-import configparser
-import db.file , file
+import configparser, time
+import db.file, file
 
 page_bp = Blueprint("page_bp", __name__)
 
@@ -15,6 +15,8 @@ def overview(page):  # 概览
     if request.cookies.get("islogin") is None:
         return redirect("/")
     metaDataList = db.file.getMetadata((page - 1) * 20, page * 20)
+    for item in metaDataList:
+        item[2] = item[2][:-4] #去除文件扩展名
     if page <= 3:
         lastPageList = range(1, page)
     else:
@@ -36,14 +38,26 @@ def book(bookid):  # 接口
     data = db.file.searchByid(bookid)
     if data == "":
         return abort(404)
-    return render_template("view.html", id=bookid, index=range(1, data[0][3]))
+    data[0] = list(data[0])
+    data[0][2] = data[0][2][0:-4] # 把文件扩展名去掉
+    local_time = time.localtime(float(data[0][4]))
+    
+    return render_template(
+        "book.html",
+        id=bookid,
+        data=data,
+        time=time.strftime("%Y-%m-%d %H:%M:%S",local_time),
+    )
 
 
 @page_bp.route("/view/<bookid>")
 def view(bookid):  # 接口
     if request.cookies.get("islogin") is None:
         return abort(403)
-    return bookid
+    data = db.file.searchByid(bookid)
+    if data == "":
+        return abort(404)
+    return render_template("view.html", id=bookid, index=range(1, data[0][3]))
 
 
 @page_bp.route("/upload", methods=["GET", "POST"])  # 文件上传

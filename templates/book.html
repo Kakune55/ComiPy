@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="/static/css/bootstrap.min.css" rel="stylesheet">
+<title>详情页面</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .header {
+        display: flex;
+        justify-content: space-between;
+        width: 80%;
+        margin-top: 20px;
+    }
+    .movie-poster {
+        flex: 1;
+        margin-right: 20px;
+    }
+    .movie-details {
+        flex: 2;
+    }
+    .movie-details h1 {
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+    .movie-details p {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+    .comments-section {
+        width: 80%;
+        margin-top: 20px;
+    }
+    .comment {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    .comment p {
+        margin: 0;
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="movie-poster">
+                <!-- 封面 -->
+                <img src="/api/img/{{ id }}/1?mini=yes" alt="封面" style="max-width: 100%;">
+            </div>
+            <div class="movie-details">
+                <!-- 详细信息 -->
+                <h1>{{ data[0][2] }}</h1>
+                <h2>时间: {{time}}</h2>
+                <h2>暂无评价</h2>
+                <button onclick="window.location.href='/view/{{ id }}'">在线浏览</button>
+            </div>
+        </div>
+        <div class="comments-section">
+            <h2>评论区</h2>
+            <!-- 评论 -->
+            <div class="comment">
+                <p>用户A：Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis, quam!</p>
+            </div>
+            <div class="comment">
+                <p>用户B：Lorem, ipsum dolor sit amet consectetur adipisicing elit. Aut sunt tempore architecto minus, cum mollitia voluptatibus repellendus aliquid id reprehenderit.</p>
+            </div>
+            <!-- 在此添加更多评论 -->
+        </div>
+    </div>
+</body>
+</html>
