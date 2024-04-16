@@ -71,22 +71,23 @@ def raedZip(bookid: str, index: int):
 def thumbnail(input,size=(400,800)):
     im = Image.open(io.BytesIO(input))
     del input
-    im = im.convert('RGB')
-    im.thumbnail(size)
-    output_io = io.BytesIO()
-    im.save(output_io,format='WEBP')
+    newimg = im.convert('RGB')
     im.close()
+    newimg.thumbnail(size)
+    output_io = io.BytesIO()
+    newimg.save(output_io,format='WEBP')
+    newimg.close()
     output_io.seek(0)
     return output_io
 
 def imageToWebP(input):
-    im = Image.open(io.BytesIO(input))
-    del input
-    im = im.convert('RGB')
-    output_io = io.BytesIO()
-    im.save(output_io,format='WEBP')
-    im.close()
-    output_io.seek(0)
+    with Image.open(io.BytesIO(input)) as img:
+        newimg = img.convert('RGB')
+        img.close()
+        output_io = io.BytesIO()
+        newimg.save(output_io,format='WEBP')
+        newimg.close()
+        output_io.seek(0)
     return output_io
     
     

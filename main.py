@@ -24,7 +24,8 @@ app.register_blueprint(page_bp)
 if __name__ == "__main__":
     appinit()
     app.run(
-        debug=config.get("server", "debug"),
+        debug=config.getboolean("server", "debug"),
         host=config.get("server", "host"),
         port=config.get("server", "port"),
+        threaded=config.getboolean("server", "threaded"),
     )

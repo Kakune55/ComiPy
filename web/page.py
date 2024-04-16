@@ -36,7 +36,7 @@ def book(bookid):  # 接口
     if request.cookies.get("islogin") is None:
         return abort(403)
     data = db.file.searchByid(bookid)
-    if data == "":
+    if len(data) == 0:
         return abort(404)
     data[0] = list(data[0])
     data[0][2] = data[0][2][0:-4] # 把文件扩展名去掉
@@ -55,7 +55,7 @@ def view(bookid):  # 接口
     if request.cookies.get("islogin") is None:
         return abort(403)
     data = db.file.searchByid(bookid)
-    if data == "":
+    if len(data) == 0:
         return abort(404)
     return render_template("view.html", id=bookid, index=range(1, data[0][3]))
 
