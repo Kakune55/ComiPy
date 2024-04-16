@@ -2,3 +2,4 @@ __pycache__
 data
 input
 test.py
+conf/app.ini
