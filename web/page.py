@@ -1,13 +1,11 @@
 from flask import *
 from flask import Blueprint
-import configparser, time
-import db.file, file
+import time
+import db.file, file , app_conf
 
 page_bp = Blueprint("page_bp", __name__)
 
-config = configparser.ConfigParser()
-config.read("./conf/app.ini")
-
+conf = app_conf.conf()
 
 @page_bp.route("/overview/<page>")
 def overview(page):  # 概览
@@ -67,7 +65,7 @@ def upload_file():
     uploaded_file = request.files.getlist("files[]")  # 获取上传的文件列表
     for fileitem in uploaded_file:
         if fileitem.filename != "":
-            fileitem.save(config.get("file", "inputdir") + "/" + fileitem.filename)
+            fileitem.save(conf.get("file", "inputdir") + "/" + fileitem.filename)
     file.auotLoadFile()
     return redirect("/")
 
@@ -79,9 +77,9 @@ def login():  # 登录页面
             return redirect("/overview/1")
         return render_template("login.html")
     elif request.method == "POST":
-        if request.form["username"] == config.get("user", "username") and request.form[
+        if request.form["username"] == conf.get("user", "username") and request.form[
             "password"
-        ] == config.get("user", "password"):
+        ] == conf.get("user", "password"):
             resp = make_response(redirect("/overview/1"))
             resp.set_cookie("islogin", "True")
             return resp

@@ -1,11 +1,11 @@
 import sqlite3, configparser
+import app_conf
 
-config = configparser.ConfigParser()
-config.read("./conf/app.ini")
+conf = app_conf.conf()
 
 
 def getConn():
-    return sqlite3.connect(config.get("database", "path"))
+    return sqlite3.connect(conf.get("database", "path"))
 
 
 def init():

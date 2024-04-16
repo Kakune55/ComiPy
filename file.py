@@ -1,33 +1,31 @@
-import shutil, os, configparser, zipfile, io
-import db.file
+import shutil, os, zipfile, io
+import db.file, app_conf
 from PIL import Image
 
-config = configparser.ConfigParser()
-config.read("./conf/app.ini")
-
+app_conf = app_conf.conf()
 
 def init():
     try:
-        os.makedirs(config.get("file", "inputdir"))
-        os.makedirs(config.get("file", "storedir"))
-        os.makedirs(config.get("file", "tmpdir"))
+        os.makedirs(app_conf.get("file", "inputdir"))
+        os.makedirs(app_conf.get("file", "storedir"))
+        os.makedirs(app_conf.get("file", "tmpdir"))
     except:
         pass
 
 
 def auotLoadFile():
-    fileList = os.listdir(config.get("file", "inputdir"))
+    fileList = os.listdir(app_conf.get("file", "inputdir"))
     for item in fileList:
         if zipfile.is_zipfile(
-            config.get("file", "inputdir") + "/" + item
+            app_conf.get("file", "inputdir") + "/" + item
         ):  # 判断是否为压缩包
             with zipfile.ZipFile(
-                config.get("file", "inputdir") + "/" + item, "r"
+                app_conf.get("file", "inputdir") + "/" + item, "r"
             ) as zip_ref:
                 db.file.new(item, len(zip_ref.namelist()))  # 添加数据库记录 移动到存储
             shutil.move(
-                config.get("file", "inputdir") + "/" + item,
-                config.get("file", "storedir") + "/" + item,
+                app_conf.get("file", "inputdir") + "/" + item,
+                app_conf.get("file", "storedir") + "/" + item,
             )
             print("已添加 " + item)
         else:
@@ -36,7 +34,7 @@ def auotLoadFile():
 
 def raedZip(bookid: str, index: int):
     bookinfo = db.file.searchByid(bookid)
-    zippath = config.get("file", "storedir") + "/" + bookinfo[0][2]
+    zippath = app_conf.get("file", "storedir") + "/" + bookinfo[0][2]
 
     try:
         # 创建一个ZipFile对象
@@ -68,7 +66,7 @@ def raedZip(bookid: str, index: int):
         return str(e), ""
 
 
-def thumbnail(input,size=(400,800)):
+def thumbnail(input,size=(420,600)):
     im = Image.open(io.BytesIO(input))
     del input
     newimg = im.convert('RGB')
@@ -80,11 +78,12 @@ def thumbnail(input,size=(400,800)):
     output_io.seek(0)
     return output_io
 
-def imageToWebP(input):
+def imageToWebP(input,size=(2100,3000)):
     with Image.open(io.BytesIO(input)) as img:
         newimg = img.convert('RGB')
         img.close()
         output_io = io.BytesIO()
+        newimg.thumbnail(size)
         newimg.save(output_io,format='WEBP')
         newimg.close()
         output_io.seek(0)

@@ -1,4 +1,4 @@
-import configparser
+import app_conf
 import db.util
 import db.file, file
 from flask import *
@@ -8,9 +8,7 @@ from web.page import page_bp
 
 app = Flask(__name__)
 
-config = configparser.ConfigParser()
-config.read("./conf/app.ini")
-
+conf = app_conf.conf()
 
 def appinit():
     file.init()
@@ -24,8 +22,8 @@ app.register_blueprint(page_bp)
 if __name__ == "__main__":
     appinit()
     app.run(
-        debug=config.getboolean("server", "debug"),
-        host=config.get("server", "host"),
-        port=config.get("server", "port"),
-        threaded=config.getboolean("server", "threaded"),
+        debug=conf.getboolean("server", "debug"),
+        host=conf.get("server", "host"),
+        port=conf.get("server", "port"),
+        threaded=conf.getboolean("server", "threaded"),
     )
