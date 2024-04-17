@@ -63,25 +63,12 @@ def upload_file():
     if request.method == "GET":
         return render_template("upload.html")
     uploaded_file = request.files.getlist("files[]")  # 获取上传的文件列表
+    print(uploaded_file)
     for fileitem in uploaded_file:
         if fileitem.filename != "":
             fileitem.save(conf.get("file", "inputdir") + "/" + fileitem.filename)
     file.auotLoadFile()
-    return redirect("/")
+    return "success"
 
 
-@page_bp.route("/", methods=["GET", "POST"])
-def login():  # 登录页面
-    if request.method == "GET":
-        if request.cookies.get("islogin") is not None:
-            return redirect("/overview/1")
-        return render_template("login.html")
-    elif request.method == "POST":
-        if request.form["username"] == conf.get("user", "username") and request.form[
-            "password"
-        ] == conf.get("user", "password"):
-            resp = make_response(redirect("/overview/1"))
-            resp.set_cookie("islogin", "True")
-            return resp
-        else:
-            return redirect("/")
+

@@ -5,6 +5,7 @@ from flask import *
 
 from web.api_Img import api_Img_bp
 from web.page import page_bp
+from web.admin_page import admin_page_bp
 
 app = Flask(__name__)
 
@@ -18,6 +19,7 @@ def appinit():
 
 app.register_blueprint(api_Img_bp)
 app.register_blueprint(page_bp)
+app.register_blueprint(admin_page_bp)
 
 if __name__ == "__main__":
     appinit()

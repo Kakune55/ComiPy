@@ -5,12 +5,12 @@ from PIL import Image
 app_conf = app_conf.conf()
 
 def init():
-    try:
-        os.makedirs(app_conf.get("file", "inputdir"))
-        os.makedirs(app_conf.get("file", "storedir"))
-        os.makedirs(app_conf.get("file", "tmpdir"))
-    except:
-        pass
+    paths = ("inputdir","storedir","tmpdir")
+    for path in paths:
+        try:
+            os.makedirs(app_conf.get("file", path))
+        except Exception as e:
+            print(e)
 
 
 def auotLoadFile():
