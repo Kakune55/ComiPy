@@ -66,6 +66,11 @@
 </head>
 
 <body>
+  <div class="input-group">
+    <input type="text" class="form-control" id="search_text" placeholder="键入以搜索">
+    <button class="btn btn-secondary" type="button" onclick="window.location.href='/overview/1?search='+document.getElementById('search_text').value">Search</button>
+  </div>
+  <hr/>
   <div id="gallery">
     {% for item in list %}
     <div class="image-container">
