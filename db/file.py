@@ -46,12 +46,17 @@ def new(filename: str, pagenumber:int):
 
 
 # 获取文件元数据
-def getMetadata(form: int, num: int):
+def getMetadata(form: int, num: int, search:str = None):
     conn = util.getConn()
     c = conn.cursor()
-    cursor = c.execute(
-        "SELECT * FROM Metadata ORDER BY num desc LIMIT ?, ?", (form, num)
-    )
+    if search is None:
+        cursor = c.execute(
+            "SELECT * FROM Metadata ORDER BY num desc LIMIT ?, ?", (form, num)
+        )
+    else:
+        cursor = c.execute(
+            "SELECT * FROM Metadata WHERE filename LIKE ? ORDER BY num desc LIMIT ?, ?", (f"%{search}%", form, num)
+        )
     out = []
     for row in cursor:
         out.append(list(row))
