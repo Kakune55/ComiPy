@@ -40,6 +40,7 @@
             width: 100%;
             height: 100%;
             backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             /* 模糊度可以根据需要调整 */
             transition: display;
             z-index: 1;
@@ -47,7 +48,7 @@
             pointer-events: none;
             /* 确保遮罩不影响下方元素的交互 */
             opacity: 0;
-            transition: opacity 0.3s ease
+            transition: opacity 0.1s ease
         }
     </style>
 </head>

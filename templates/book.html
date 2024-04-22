@@ -76,14 +76,14 @@
         <div class="header">
             <div class="movie-poster">
                 <!-- 封面 -->
-                <img src="/api/img/{{ id }}/1?mini=yes" alt="封面" style="max-width: 100%;">
+                <img class="img-thumbnail" src="/api/img/{{ id }}/1?mini=yes" alt="封面" style="max-width: 100%;">
             </div>
             <div class="movie-details">
                 <!-- 详细信息 -->
                 <h1>{{ data[0][2] }}</h1>
                 <h2>时间: {{time}}</h2>
                 <h2>暂无评价</h2>
-                <button onclick="window.location.href='/view/{{ id }}'">在线浏览</button>
+                <button class="btn btn-primary" onclick="window.location.href='/view/{{ id }}'">在线浏览</button>
             </div>
         </div>
         <div class="comments-section">
