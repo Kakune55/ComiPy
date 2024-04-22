@@ -39,28 +39,23 @@
       }
     }
 
-    .image {
-      max-width: 100%;
-      height: auto;
-      cursor: pointer;
-    }
-
-    #imageContainer {
-      display: none;
-      justify-content: center;
-      align-items: center;
+    #global-blur {
+      background-color: rgba(255, 255, 255, 0.5);
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 9999;
-      max-height: 90%;
-      max-width: 90%;
-    }
-
-    #imageContainer img {
-      max-width: 100%;
-      height: auto;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      /* 模糊度可以根据需要调整 */
+      transition: display;
+      z-index: 1;
+      /* 保证遮罩在页面上方 */
+      pointer-events: none;
+      /* 确保遮罩不影响下方元素的交互 */
+      opacity: 0;
+      transition: opacity 0.1s ease
     }
   </style>
 </head>
@@ -68,32 +63,40 @@
 <body>
   <div class="input-group">
     <input type="text" class="form-control" id="search_text" placeholder="键入以搜索">
-    <button class="btn btn-secondary" type="button" onclick="window.location.href='/overview/1?search='+document.getElementById('search_text').value">Search</button>
+    <button class="btn btn-secondary" type="button"
+      onclick="window.location.href='/overview/1?search='+document.getElementById('search_text').value">Search</button>
   </div>
-  <hr/>
+  <hr />
   <div id="gallery">
     {% for item in list %}
-    <div class="image-container">
-      <img src="/api/img/{{ item[1] }}/1?mini=yes" class="image" onclick="linkjump('{{ item[1] }}')" />
-      <span>{{ item[2] }}</span>
+    <div class="card">
+      <img src="/api/img/{{ item[1] }}/1?mini=yes" class="img-thumbnail card-img-top"
+        onclick="linkjump('{{ item[1] }}')" />
+      <div class="card-body">
+        <p class="card-text">{{ item[2] }}</p>
+      </div>
     </div>
     {% endfor %}
   </div>
-  <div style="display:flex;justify-content: center; align-items:center;">
-    <div class="btn-group" role=" toolbar" aria-label="Toolbar with button groups">
+  <hr />
+  <div style=display:flex;justify-content:center;align-items:center;>
+    <ul class="pagination">
+      <li class="page-item">
+        <a class="page-link">Page</a>
+      </li>
       {% for item in lastPageList %}
-      <button type="button" class="btn btn-primary" onclick="switchPage('{{item}}')">{{item}}</button>
+      <li class="page-item"><a class="page-link" onclick="switchPage('{{item}}')">{{item}}</a></li>
       {% endfor %}
-    </div>
-    <div class="btn-group" role=" group" aria-label="Second group">
-      <button type="button" class="btn btn-info">{{pagenow}}</button>
-    </div>
-    <div class="btn-group" role="group" aria-label="Third group">
+      <li class="page-item active" aria-current="page">
+        <a class="page-link">{{pagenow}}</a>
+      </li>
       {% for item in nextPageList %}
-      <button type="button" class="btn btn-primary" onclick="switchPage('{{item}}')">{{item}}</button>
+      <li class="page-item"><a class="page-link" onclick="switchPage('{{item}}')">{{item}}</a></li>
       {% endfor %}
-    </div>
+      <ul>
   </div>
+
+  <div id="global-blur" onclick="unshow_global_blur()"></div>
 
   <script>
     function linkjump(url) {
@@ -102,6 +105,25 @@
     function switchPage(pagemun) {
       window.location.replace("/overview/" + pagemun)
     }
+
+
+    document.addEventListener('visibilitychange', documentVisibilityChange)
+    global_blur = document.getElementById("global-blur")
+
+    function documentVisibilityChange() {
+      if (document.visibilityState === "hidden") {
+        global_blur.style.opacity = 1;
+        global_blur.style.pointerEvents = "auto";
+      }
+      if (document.visibilityState === "visible") {
+      }
+    }
+
+    function unshow_global_blur() {
+      global_blur.style.opacity = 0;
+      global_blur.style.pointerEvents = "none";
+    }
+
   </script>
 </body>
 
