@@ -26,6 +26,7 @@ def overview(page):  # 概览
         lastPageList=lastPageList,
         pagenow=page,
         nextPageList=nextPageList,
+        aftertime=int(time.time())-3*86400
     )
 
 
