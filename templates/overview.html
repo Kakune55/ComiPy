@@ -50,7 +50,7 @@
       -webkit-backdrop-filter: blur(10px);
       /* 模糊度可以根据需要调整 */
       transition: display;
-      z-index: 1;
+      z-index: 10;
       /* 保证遮罩在页面上方 */
       pointer-events: none;
       /* 确保遮罩不影响下方元素的交互 */
@@ -61,10 +61,20 @@
 </head>
 
 <body>
-  <div class="input-group">
-    <input type="text" class="form-control" id="search_text" placeholder="键入以搜索">
-    <button class="btn btn-secondary" type="button"
-      onclick="window.location.href='/overview/1?search='+document.getElementById('search_text').value">Search</button>
+  <div style="display: flex;">
+    <div class="input-group">
+      <input type="text" class="form-control" id="search_text" placeholder="键入以搜索">
+      <button class="btn btn-secondary" type="button"
+        onclick="window.location.href='/overview/1?search='+document.getElementById('search_text').value">Search</button>
+    </div>
+    <div class="dropdown" style="margin-left: 10px;">
+      <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        {{username}}
+      </button>
+      <ul class="dropdown-menu">
+        <li><button class="dropdown-item" href="#" onclick="logout()">Log out</button></li>
+      </ul>
+    </div>
   </div>
   <hr />
   <div id="gallery">
@@ -98,6 +108,9 @@
 
   <div id="global-blur" onclick="unshow_global_blur()"></div>
 
+  <script src="https://unpkg.com/@popperjs/core@2"></script>
+  <script src="/static/js/jquery.min.js"></script>
+  <script src="/static/js/bootstrap.min.js"></script>
   <script>
     function linkjump(url) {
       window.open("/book/" + url)
@@ -122,6 +135,11 @@
     function unshow_global_blur() {
       global_blur.style.opacity = 0;
       global_blur.style.pointerEvents = "none";
+    }
+
+    function logout() {
+      document.cookie = "islogin=1; max-age=0"
+      //location.href = "/";
     }
 
   </script>
