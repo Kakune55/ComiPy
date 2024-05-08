@@ -80,6 +80,9 @@
   <div id="gallery">
     {% for item in list %}
     <div class="card">
+      {% if item[4] > aftertime %}
+      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">New</span>
+      {% endif %}
       <img src="/api/img/{{ item[1] }}/1?mini=yes" class="img-thumbnail card-img-top"
         onclick="linkjump('{{ item[1] }}')" />
       <div class="card-body">
