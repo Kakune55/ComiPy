@@ -25,3 +25,20 @@ def comment_api():  # 概览
         request.form["text"],
     )
     return redirect("/book/" + request.form["bookid"])
+
+@comment_api_bp.route("/api/comment/remove")
+def remove():  # 删除api
+    if request.cookies.get("islogin") is None:  # 验证登录状态
+        return abort(403)
+    try:
+        id = int(request.args.get("id"))
+    except:
+        return abort(400)
+    commentInfo = db.comments.getById(id)
+    if commentInfo is None:
+        return abort(404)
+    if int(request.cookies.get("uid")) == commentInfo[3]:
+        if db.comments.remove(id):
+            return "OK"
+        return abort(404)
+    return abort(400)

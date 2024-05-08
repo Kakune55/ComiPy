@@ -3,6 +3,14 @@ import db.util as util
 
 
 # 查找评论
+def getById(id: str):
+    "通过id查找所有评论"
+    conn = util.getConn()
+    c = conn.cursor()
+    cursor = c.execute("SELECT * FROM Comments WHERE id = ?", (id,))
+    return cursor.fetchone()
+
+# 查找评论
 def listByBookid(id: str):
     "通过bookid查找所有评论"
     conn = util.getConn()
@@ -74,3 +82,16 @@ def new(bookid: str, from_uid: int, score: str, content=""):
     conn.commit()
     conn.close()
     return
+
+# 查找评论
+def remove(id:int)->bool:
+    "通过id删除评论"
+    conn = util.getConn()
+    c = conn.cursor()
+    c.execute("DELETE FROM Comments WHERE id = ?", (id,))
+    conn.commit()
+    changes = conn.total_changes
+    conn.close()
+    if changes == 0:
+        return False
+    return True

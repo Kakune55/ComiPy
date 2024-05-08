@@ -74,32 +74,32 @@
 <body>
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">评论</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">评论</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="comment" action="/api/comment/upload" method="post">
+                        <select class="form-select" aria-label="Default select example" name="score">
+                            <option value="none">无评价</option>
+                            <option value="like">赞👍</option>
+                            <option value="dislike">踩👎</option>
+                        </select>
+                        <div class="input-group" style="margin-top: 10px;">
+                            <span class="input-group-text">评论</span>
+                            <textarea class="form-control" name="text" aria-label="With textarea"></textarea>
+                        </div>
+                        <input type="hidden" name="bookid" value="{{data[0][1]}}" />
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="commentSubmit()">提交</button>
+                </div>
             </div>
-            <div class="modal-body">
-              <form id="comment" action="/api/comment/upload" method="post">
-                <select class="form-select" aria-label="Default select example" name="score">
-                    <option value="none">无评价</option>
-                    <option value="like">赞👍</option>
-                    <option value="dislike">踩👎</option>
-                  </select>
-                  <div class="input-group" style="margin-top: 10px;" >
-                    <span class="input-group-text">评论</span>
-                    <textarea class="form-control" name="text" aria-label="With textarea"></textarea>
-                  </div>
-                  <input type="hidden" name="bookid" value="{{data[0][1]}}"/>
-              </form>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-              <button type="button" class="btn btn-primary" onclick="commentSubmit()">提交</button>
-            </div>
-          </div>
         </div>
-      </div>
+    </div>
 
 
     <div class="container">
@@ -112,10 +112,12 @@
                 <!-- 详细信息 -->
                 <h1>{{ data[0][2] }}</h1>
                 <h3>更新时间: {{time}}</h3>
-                <h2>👍{{socre["like"]}}  👎{{socre["dislike"]}}</h2>
+                <h2>👍{{socre["like"]}} 👎{{socre["dislike"]}}</h2>
                 <button class="btn btn-primary" onclick="window.location.href='/view/{{ id }}'">在线浏览</button>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">撰写评论</button>
+                {%if islogin == "admin"%}
                 <button class="btn btn-danger">删除资源</button>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -130,18 +132,20 @@
             {% for item in comments %}
             <div class="comment">
                 <h3>{{item["from"]}}:
-                {%if item["socre"] == "like"%}
-                <small class="text-muted">觉得很赞👍</small>
-                {%endif%}
-                {%if item["socre"] == "dislike"%}
-                <small class="text-muted">点了个踩👎</small>
-                {%endif%}
+                    {%if item["socre"] == "like"%}
+                    <small class="text-muted">觉得很赞👍</small>
+                    {%endif%}
+                    {%if item["socre"] == "dislike"%}
+                    <small class="text-muted">点了个踩👎</small>
+                    {%endif%}
                 </h3>
                 <h3>{{item["text"]}}</h3>
-                <small class="text-muted">id:{{item["id"]}}  {{item["time"]}}</small>
+                <small class="text-muted">id:{{item["id"]}} {{item["time"]}}</small>
+                {% if islogin == item["from"] %}
+                <button class="btn btn-danger" id="{{item['id']}}" onclick="delComment(id)">删除</button>
+                {% endif %}
             </div>
             {% endfor %}
-            <!-- 在此添加更多评论 -->
         </div>
     </div>
 
@@ -151,8 +155,28 @@
 
     <script>
         const comment = document.getElementById("comment")
-        function commentSubmit(){
+        function commentSubmit() {
             comment.submit()
+        }
+
+        function delComment(id) {
+            fetch("/api/comment/remove?id=" + id, {
+                method: 'GET'
+            })
+                .then(response => {
+                    // 首先检查HTTP状态码
+                    if (response.ok) {
+                        // 请求成功，刷新页面
+                        location.reload();
+                    } else {
+                        // 请求失败，抛出一个错误
+                        throw new Error('网络请求失败，状态码：' + response.status);
+                    }
+                })
+                .catch(error => {
+                    // 处理任何在请求过程中发生的错误
+                    alert('请求失败：' + error.message);
+                });
         }
     </script>
 

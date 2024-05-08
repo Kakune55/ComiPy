@@ -48,6 +48,7 @@ def book(bookid):  # 接口
     raw_com = db.comments.listByBookid(bookid)
     comments = []
     for i in raw_com:
+        print(request.cookies.get("islogin"))
         comments.append(
             {
                 "id": i[0],
@@ -65,6 +66,7 @@ def book(bookid):  # 接口
         time=time.strftime("%Y-%m-%d %H:%M:%S", local_time),
         socre=db.comments.getScore(bookid),
         comments=comments,
+        islogin=request.cookies.get("islogin")
     )
 
 
