@@ -74,7 +74,7 @@ def thumbnail(input, minSize: int = 600):
     if height < width:
         newshape = (int(minSize / width * height), minSize)
     else:
-        newshape = (minSize, int(minSize / width * height))
+        newshape = (minSize, int(minSize / height * width))
     img = cv2.resize(img, newshape)
     success, encoded_image = cv2.imencode(".webp", img, [cv2.IMWRITE_WEBP_QUALITY, 75])
     return encoded_image.tobytes()

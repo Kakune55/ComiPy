@@ -1,3 +1,4 @@
 shortuuid
 flask
 opencv-python
+opencv-python-headless
