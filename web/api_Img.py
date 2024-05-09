@@ -16,9 +16,9 @@ def img(bookid, index):  # 图片接口
     if isinstance(data, str):
         abort(404)
     if request.args.get("mini") == "yes":
-        data = file.thumbnail(data)
+        data = file.thumbnail(data,encode="jpg")
     else:
-        data = file.thumbnail(data,2400)
+        data = file.thumbnail(data,1500,)
     response = make_response(data)  # 读取文件
     del data
     response.headers.set("Content-Type", "image/Webp")

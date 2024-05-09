@@ -67,14 +67,20 @@ def raedZip(bookid: str, index: int):
         return str(e), ""
 
 
-def thumbnail(input, minSize: int = 600):
+def thumbnail(input, minSize: int = 600, encode:str="webp"):
     img = cv2.imdecode(np.frombuffer(input, np.uint8), cv2.IMREAD_COLOR)
     height = img.shape[0]  # 图片高度
     width = img.shape[1]  # 图片宽度
-    if height > width:
-        newshape = (minSize, int(minSize / width * height))
+    if minSize < np.amin((height,width)):
+        if height > width:
+            newshape = (minSize, int(minSize / width * height))
+        else:
+            newshape = (int(minSize / height * width), minSize)
+        img = cv2.resize(img, newshape)
+    if encode == "webp":
+        success, encoded_image = cv2.imencode(".webp", img, [cv2.IMWRITE_WEBP_QUALITY, 75])
+    elif encode == "jpg":
+        success, encoded_image = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 75])
     else:
-        newshape = (int(minSize / height * width), minSize)
-    img = cv2.resize(img, newshape)
-    success, encoded_image = cv2.imencode(".webp", img, [cv2.IMWRITE_WEBP_QUALITY, 75])
+        return input
     return encoded_image.tobytes()
