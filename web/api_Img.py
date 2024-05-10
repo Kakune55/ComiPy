@@ -1,9 +1,13 @@
 from flask import *
 from flask import Blueprint
-import db.file , file, gc
+import db.file , file, gc , app_conf
 
 api_Img_bp = Blueprint("api_Img_bp", __name__)
 
+conf = app_conf.conf()
+imgencode = conf.get("img", "encode")
+miniSize = conf.getint("img", "miniSize")
+fullSize = conf.getint("img", "fullSize")
 
 @api_Img_bp.route("/api/img/<bookid>/<index>")
 def img(bookid, index):  # 图片接口
@@ -16,12 +20,12 @@ def img(bookid, index):  # 图片接口
     if isinstance(data, str):
         abort(404)
     if request.args.get("mini") == "yes":
-        data = file.thumbnail(data,encode="jpg")
+        data = file.thumbnail(data,miniSize,encode=imgencode)
     else:
-        data = file.thumbnail(data,1500)
+        data = file.thumbnail(data,fullSize,encode=imgencode)
     response = make_response(data)  # 读取文件
     del data
-    response.headers.set("Content-Type", "image/Webp")
+    response.headers.set("Content-Type",f"image/{imgencode}")
     response.headers.set("Content-Disposition", "inline", filename=filename)
     gc.collect()
     return response

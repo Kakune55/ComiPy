@@ -79,7 +79,7 @@ def thumbnail(input, minSize: int = 600, encode:str="webp"):
         img = cv2.resize(img, newshape)
     if encode == "webp":
         success, encoded_image = cv2.imencode(".webp", img, [cv2.IMWRITE_WEBP_QUALITY, 75])
-    elif encode == "jpg":
+    elif encode == "jpg" or "jpeg":
         success, encoded_image = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 75])
     else:
         return input
