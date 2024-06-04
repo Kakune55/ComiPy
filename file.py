@@ -1,11 +1,12 @@
-import shutil, os, zipfile, io
+import shutil, os, zipfile, io, cv2, numpy as np
+
 import db.file, app_conf
-from PIL import Image
 
 app_conf = app_conf.conf()
 
+
 def init():
-    paths = ("inputdir","storedir","tmpdir")
+    paths = ("inputdir", "storedir", "tmpdir")
     for path in paths:
         try:
             os.makedirs(app_conf.get("file", path))
@@ -66,27 +67,20 @@ def raedZip(bookid: str, index: int):
         return str(e), ""
 
 
-def thumbnail(input,size=(420,600)):
-    im = Image.open(io.BytesIO(input))
-    del input
-    newimg = im.convert('RGB')
-    im.close()
-    newimg.thumbnail(size)
-    output_io = io.BytesIO()
-    newimg.save(output_io,format='WEBP')
-    newimg.close()
-    output_io.seek(0)
-    return output_io
-
-def imageToWebP(input,size=(2100,3000)):
-    with Image.open(io.BytesIO(input)) as img:
-        newimg = img.convert('RGB')
-        img.close()
-        output_io = io.BytesIO()
-        newimg.thumbnail(size)
-        newimg.save(output_io,format='WEBP')
-        newimg.close()
-        output_io.seek(0)
-    return output_io
-    
-    
+def thumbnail(input, minSize: int = 600, encode:str="webp"):
+    img = cv2.imdecode(np.frombuffer(input, np.uint8), cv2.IMREAD_COLOR)
+    height = img.shape[0]  # 图片高度
+    width = img.shape[1]  # 图片宽度
+    if minSize < np.amin((height,width)):
+        if height > width:
+            newshape = (minSize, int(minSize / width * height))
+        else:
+            newshape = (int(minSize / height * width), minSize)
+        img = cv2.resize(img, newshape)
+    if encode == "webp":
+        success, encoded_image = cv2.imencode(".webp", img, [cv2.IMWRITE_WEBP_QUALITY, 75])
+    elif encode == "jpg" or "jpeg":
+        success, encoded_image = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 75])
+    else:
+        return input
+    return encoded_image.tobytes()

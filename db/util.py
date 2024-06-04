@@ -31,5 +31,29 @@ def init():
     );
     """
     )
+    c.execute(
+        """
+    CREATE TABLE IF NOT EXISTS Comments  (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    time INT NOT NULL,
+    bookid TEXT NOT NULL,
+    from_uid INTEGAR NOT NULL,
+    score INT NOT NULL,
+    content TEXT
+    );
+    """
+    )
+    c.execute(
+        """
+    INSERT INTO User (username, password) 
+    SELECT ?, ?
+    WHERE NOT EXISTS (SELECT 1 FROM User WHERE username = ?);
+    """,
+        (
+            conf.get("user", "username"),
+            conf.get("user", "password"),
+            conf.get("user", "username"),
+        ),
+    )
     conn.commit()
     conn.close()

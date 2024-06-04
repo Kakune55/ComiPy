@@ -1,3 +1,4 @@
 shortuuid
 flask
-Pillow
+opencv-python
+opencv-python-headless

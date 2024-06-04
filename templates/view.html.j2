@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漫画详情页</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        #comic-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .comic-image {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        img {
+            display: block;
+            width: 100%;
+            min-height: 200px;
+            margin-top: 10px;
+        }
+
+        #pagination {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .page-button {
+            padding: 10px 15px;
+            margin: 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .page-button:disabled {
+            background-color: #cccccc;
+        }
+
+        .ellipsis {
+            padding: 10px 15px;
+            margin: 0 5px;
+            background-color: transparent;
+            border: none;
+            cursor: default;
+        }
+
+        #global-blur {
+            background-color: rgba(255, 255, 255, 0.8);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: opacity 0.1s ease;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="comic-container"></div>
+    <div id="pagination"></div>
+    <div id="global-blur" onclick="unshowGlobalBlur()"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const imgsData = [
+                {% for i in index %}
+                { src: "/api/img/{{ id }}/{{ i }}", alt: "漫画页面 {{ i }}" },
+                {% endfor %}
+            ];
+            const itemsPerPage = 25; // 每页显示的图片数量
+            let currentPage = 1;
+
+            function renderPage(page) {
+                const comicContainer = document.getElementById('comic-container');
+                comicContainer.innerHTML = ''; // 清空当前内容
+
+                const start = (page - 1) * itemsPerPage;
+                const end = start + itemsPerPage;
+                const pageItems = imgsData.slice(start, end);
+
+                pageItems.forEach(item => {
+                    const img = document.createElement('img');
+                    img.className = 'imgs comic-image';
+                    img.setAttribute('data-src', item.src);
+                    img.setAttribute('alt', item.alt);
+                    comicContainer.appendChild(img);
+                });
+
+                window.scrollTo(0, 0); // 滚动到页面顶部
+                lazyLoad(); // 确保惰性加载生效
+            }
+
+            function renderPagination() {
+                const pagination = document.getElementById('pagination');
+                pagination.innerHTML = ''; // 清空当前内容
+
+                const totalPages = Math.ceil(imgsData.length / itemsPerPage);
+
+                if (totalPages <= 1) return;
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const button = document.createElement('button');
+                    button.className = 'page-button';
+                    button.innerText = i;
+                    button.disabled = (i === currentPage);
+                    button.addEventListener('click', () => {
+                        currentPage = i;
+                        renderPage(i);
+                        renderPagination();
+                    });
+                    pagination.appendChild(button);
+                }
+            }
+
+            function lazyLoad() {
+                const imgs = document.querySelectorAll('.imgs');
+                const windowHeight = window.innerHeight;
+                const scrollY = window.scrollY || window.pageYOffset;
+
+                imgs.forEach(img => {
+                    if (img.src) return; // 如果已经加载过了就跳过
+
+                    const imgTop = img.getBoundingClientRect().top + scrollY;
+                    if (windowHeight + scrollY > imgTop) {
+                        img.src = img.getAttribute('data-src');
+                    }
+                });
+            }
+
+            window.addEventListener('scroll', lazyLoad);
+            window.addEventListener('resize', lazyLoad);
+            lazyLoad(); // 页面加载时初始化调用
+
+            const globalBlur = document.getElementById('global-blur');
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') {
+                    globalBlur.style.opacity = 1;
+                    globalBlur.style.pointerEvents = 'auto';
+                } else if (document.visibilityState === 'visible') {
+                    globalBlur.style.opacity = 0;
+                    globalBlur.style.pointerEvents = 'none';
+                }
+            });
+
+            renderPage(currentPage);
+            renderPagination();
+        });
+
+        function unshowGlobalBlur() {
+            const globalBlur = document.getElementById('global-blur');
+            globalBlur.style.opacity = 0;
+            globalBlur.style.pointerEvents = 'none';
+        }
+    </script>
+</body>
+
+</html>
