@@ -77,7 +77,7 @@ def view(bookid):  # 接口
     data = db.file.searchByid(bookid)
     if len(data) == 0:
         return abort(404)
-    return render_template("view.html", id=bookid, index=range(1, data[0][3]))
+    return render_template("view.html.j2", id=bookid, index=range(1, data[0][3]))
 
 
 @page_bp.route("/upload", methods=["GET", "POST"])  # 文件上传
