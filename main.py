@@ -3,10 +3,10 @@ import db.util
 import db.file, file
 from flask import *
 
-from web.api_Img import api_Img_bp
-from web.page import page_bp
-from web.admin_page import admin_page_bp
-from web.api_comment import comment_api_bp
+from router.api_Img import api_Img_bp
+from router.page import page_bp
+from router.admin_page import admin_page_bp
+from router.api_comment import comment_api_bp
 
 app = Flask(__name__)
 

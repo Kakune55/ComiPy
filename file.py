@@ -44,7 +44,7 @@ def raedZip(bookid: str, index: int):
             image_files = [
                 file
                 for file in zip_ref.namelist()
-                if file.lower().endswith((".png", ".jpg", ".jpeg"))
+                if file.lower().endswith((".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"))
             ]
 
             if not image_files:

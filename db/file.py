@@ -49,7 +49,7 @@ def new(filename: str, pagenumber:int):
 def getMetadata(form: int, num: int, search:str = None):
     conn = util.getConn()
     c = conn.cursor()
-    if search is None:
+    if search == None:
         cursor = c.execute(
             "SELECT * FROM Metadata ORDER BY num desc LIMIT ?, ?", (form, num)
         )
