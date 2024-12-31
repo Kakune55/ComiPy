@@ -24,7 +24,7 @@ def overview(page):  # 概览
         lastPageList = range(page - 3, page)
     nextPageList = range(page + 1, page + 4)
     return render_template(
-        "overview.html",
+        "overview.html.j2",
         list=metaDataList,
         lastPageList=lastPageList,
         pagenow=page,
@@ -60,7 +60,7 @@ def book(bookid):  # 接口
         )
 
     return render_template(
-        "book.html",
+        "book.html.j2",
         id=bookid,
         data=data,
         time=time.strftime("%Y-%m-%d %H:%M:%S", local_time),
@@ -77,7 +77,7 @@ def view(bookid):  # 接口
     data = db.file.searchByid(bookid)
     if len(data) == 0:
         return abort(404)
-    return render_template("view.html.j2", id=bookid, index=range(1, data[0][3]))
+    return render_template("view.html.j2", id=bookid, index=range(0, data[0][3]))
 
 
 @page_bp.route("/upload", methods=["GET", "POST"])  # 文件上传
