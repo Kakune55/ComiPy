@@ -37,8 +37,8 @@ def init():
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     time INT NOT NULL,
     bookid TEXT NOT NULL,
-    from_uid INTEGAR NOT NULL,
-    score INT NOT NULL,
+    from_uid INTEGER NOT NULL,
+    score TEXT NOT NULL,
     content TEXT
     );
     """

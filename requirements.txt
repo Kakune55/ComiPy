@@ -1,4 +1,12 @@
 shortuuid
-flask
+flask>=2.3.0
 opencv-python
 opencv-python-headless
+werkzeug>=2.3.0
+Pillow>=9.0.0
+python-dotenv
+flask-limiter
+# 性能测试依赖（可选）
+requests>=2.25.0
+# 如果需要更好的性能监控，可以添加
+# psutil>=5.8.0

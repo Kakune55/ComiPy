@@ -14,7 +14,7 @@ def overview(page):  # 概览
     if request.cookies.get("islogin") is None:  # 验证登录状态
         return redirect("/")
     metaDataList = db.file.getMetadata(
-        (page - 1) * 20, page * 20, request.args.get("search")
+        (page - 1) * 20, page * 20, request.args.get("search", "")
     )
     for item in metaDataList:
         item[2] = item[2][:-4]  # 去除文件扩展名
@@ -89,7 +89,13 @@ def upload_file():
     uploaded_file = request.files.getlist("files[]")  # 获取上传的文件列表
     print(uploaded_file)
     for fileitem in uploaded_file:
-        if fileitem.filename != "":
-            fileitem.save(conf.get("file", "inputdir") + "/" + fileitem.filename)
-    file.auotLoadFile()
+        if fileitem.filename and fileitem.filename != "":
+            input_dir = conf.get("file", "inputdir")
+            if not input_dir:
+                return "Input directory is not configured.", 500
+            import os
+            if input_dir is None:
+                return "Input directory is not configured.", 500
+            fileitem.save(os.path.join(input_dir, fileitem.filename))
+    file.autoLoadFile()
     return "success"

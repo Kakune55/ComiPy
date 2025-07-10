@@ -3,3 +3,5 @@ data
 input
 test.py
 conf/app.ini
+logs/app.log
+logs/error.log
