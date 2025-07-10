@@ -6,82 +6,229 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ComiPy-漫画详情页</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Google Sans', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f0f0f0;
+            padding: 0;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            color: #202124;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: #ffffff;
+            padding: 12px 20px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            border-bottom: 1px solid #dadce0;
+            transform: translateY(0);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .header.hidden {
+            transform: translateY(-100%);
+        }
+
+        .header h1 {
+            display: none;
+        }
+
+        .page-info {
+            font-size: 0.8rem;
+            color: #5f6368;
+            margin-bottom: 8px;
+            font-weight: 400;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 16px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            margin-top: 80px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
         }
 
         #comic-container {
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
         }
 
         .comic-image {
             max-width: 100%;
+            width: auto;
             height: auto;
-            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
+            transition: box-shadow 0.3s ease;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .comic-image:hover {
+            box-shadow: 0 4px 8px rgba(60, 64, 67, 0.3);
         }
 
         img {
             display: block;
             width: 100%;
             min-height: 200px;
-            margin-top: 10px;
+            border-radius: 4px;
+            background: linear-gradient(45deg, #f1f3f4 25%, transparent 25%, transparent 75%, #f1f3f4 75%), 
+                        linear-gradient(45deg, #f1f3f4 25%, transparent 25%, transparent 75%, #f1f3f4 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
         }
 
-        #pagination {
+        .pagination-container {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
-            margin-top: 20px;
+            gap: 8px;
+            margin: 16px 0;
         }
 
         .page-button {
-            padding: 10px 15px;
-            margin: 5px;
-            background-color: #007bff;
-            color: white;
-            border: none;
+            padding: 8px 16px;
+            background: #ffffff;
+            color: #1a73e8;
+            border: 1px solid #dadce0;
             cursor: pointer;
-            border-radius: 5px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            min-width: 36px;
+            font-family: inherit;
+        }
+
+        .page-button:hover:not(:disabled) {
+            box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
+            border-color: #1a73e8;
+        }
+
+        .page-button:active:not(:disabled) {
+            background: #f8f9fa;
         }
 
         .page-button:disabled {
-            background-color: #cccccc;
-        }
-
-        .ellipsis {
-            padding: 10px 15px;
-            margin: 0 5px;
-            background-color: transparent;
-            border: none;
+            background: #1a73e8;
+            color: #ffffff;
+            border-color: #1a73e8;
             cursor: default;
         }
 
+        .page-button.nav-button {
+            background: #1a73e8;
+            color: #ffffff;
+            border-color: #1a73e8;
+            padding: 8px 24px;
+            font-size: 14px;
+        }
+
+        .page-button.nav-button:hover:not(:disabled) {
+            background: #1557b0;
+            box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
+        }
+
+        .page-button:disabled.nav-button {
+            background: #dadce0;
+            color: #80868b;
+            border-color: #dadce0;
+        }
+
+        .ellipsis {
+            padding: 8px 16px;
+            margin: 0;
+            background: transparent;
+            border: none;
+            cursor: default;
+            color: #5f6368;
+            font-weight: 400;
+        }
+
+        .loading-placeholder {
+            background: linear-gradient(90deg, #f1f3f4 25%, #e8eaed 50%, #f1f3f4 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
         #global-blur {
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(255, 255, 255, 0.95);
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            transition: opacity 0.1s ease;
-            z-index: 1;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: opacity 0.3s ease;
+            z-index: 1000;
             pointer-events: none;
             opacity: 0;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 16px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .container {
+                margin: 8px;
+                padding: 16px 12px;
+            }
+            
+            .page-button {
+                padding: 6px 12px;
+                font-size: 13px;
+                min-width: 32px;
+            }
+            
+            .page-button.nav-button {
+                padding: 6px 16px;
+                font-size: 13px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div id="comic-container"></div>
-    <div id="pagination"></div>
+    <div class="header" id="header">
+        <div class="page-info" id="page-info">第 <span id="current-page-display">1</span> 页，共 <span id="total-pages-display">1</span> 页</div>
+        <div class="pagination-container" id="top-pagination"></div>
+    </div>
+    
+    <div class="container">
+        <div id="comic-container"></div>
+        <div class="pagination-container" id="bottom-pagination"></div>
+    </div>
+    
     <div id="global-blur" onclick="unshowGlobalBlur()"></div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -92,47 +239,142 @@
             ];
             const itemsPerPage = 25; // 每页显示的图片数量
             let currentPage = 1;
+            const totalPages = Math.ceil(imgsData.length / itemsPerPage);
 
             function renderPage(page) {
                 const comicContainer = document.getElementById('comic-container');
                 comicContainer.innerHTML = ''; // 清空当前内容
 
+                // 显示加载动画
+                showLoadingPlaceholders();
+
                 const start = (page - 1) * itemsPerPage;
                 const end = start + itemsPerPage;
                 const pageItems = imgsData.slice(start, end);
 
-                pageItems.forEach(item => {
-                    const img = document.createElement('img');
-                    img.className = 'imgs comic-image';
-                    img.setAttribute('data-src', item.src);
-                    img.setAttribute('alt', item.alt);
-                    comicContainer.appendChild(img);
-                });
+                // 清空加载动画并加载图片
+                setTimeout(() => {
+                    comicContainer.innerHTML = '';
+                    pageItems.forEach((item, index) => {
+                        const img = document.createElement('img');
+                        img.className = 'imgs comic-image loading-placeholder';
+                        img.setAttribute('data-src', item.src);
+                        img.setAttribute('alt', item.alt);
+                        img.onload = () => img.classList.remove('loading-placeholder');
+                        comicContainer.appendChild(img);
+                    });
 
-                window.scrollTo(0, 0); // 滚动到页面顶部
-                lazyLoad(); // 确保惰性加载生效
+                    window.scrollTo({ top: 0, behavior: 'smooth' }); // 平滑滚动到页面顶部
+                    lazyLoad(); // 确保惰性加载生效
+                }, 300);
+            }
+
+            function showLoadingPlaceholders() {
+                const comicContainer = document.getElementById('comic-container');
+                comicContainer.innerHTML = '';
+                for (let i = 0; i < Math.min(itemsPerPage, 5); i++) {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'comic-image loading-placeholder';
+                    placeholder.style.height = '400px';
+                    comicContainer.appendChild(placeholder);
+                }
+            }
+
+            function updatePageInfo() {
+                document.getElementById('current-page-display').textContent = currentPage;
+                document.getElementById('total-pages-display').textContent = totalPages;
             }
 
             function renderPagination() {
-                const pagination = document.getElementById('pagination');
-                pagination.innerHTML = ''; // 清空当前内容
-
-                const totalPages = Math.ceil(imgsData.length / itemsPerPage);
+                const topPagination = document.getElementById('top-pagination');
+                const bottomPagination = document.getElementById('bottom-pagination');
+                
+                // 清空当前内容
+                topPagination.innerHTML = '';
+                bottomPagination.innerHTML = '';
 
                 if (totalPages <= 1) return;
 
-                for (let i = 1; i <= totalPages; i++) {
+                // 创建分页按钮
+                function createPaginationButtons(container) {
+                    // 上一页按钮
+                    const prevButton = document.createElement('button');
+                    prevButton.className = 'page-button nav-button';
+                    prevButton.innerHTML = '上一页';
+                    prevButton.disabled = (currentPage === 1);
+                    prevButton.addEventListener('click', () => {
+                        if (currentPage > 1) {
+                            currentPage--;
+                            changePage();
+                        }
+                    });
+                    container.appendChild(prevButton);
+
+                    // 页码按钮
+                    const startPage = Math.max(1, currentPage - 2);
+                    const endPage = Math.min(totalPages, currentPage + 2);
+
+                    // 第一页
+                    if (startPage > 1) {
+                        createPageButton(container, 1);
+                        if (startPage > 2) {
+                            const ellipsis = document.createElement('span');
+                            ellipsis.className = 'ellipsis';
+                            ellipsis.textContent = '...';
+                            container.appendChild(ellipsis);
+                        }
+                    }
+
+                    // 中间页码
+                    for (let i = startPage; i <= endPage; i++) {
+                        createPageButton(container, i);
+                    }
+
+                    // 最后一页
+                    if (endPage < totalPages) {
+                        if (endPage < totalPages - 1) {
+                            const ellipsis = document.createElement('span');
+                            ellipsis.className = 'ellipsis';
+                            ellipsis.textContent = '...';
+                            container.appendChild(ellipsis);
+                        }
+                        createPageButton(container, totalPages);
+                    }
+
+                    // 下一页按钮
+                    const nextButton = document.createElement('button');
+                    nextButton.className = 'page-button nav-button';
+                    nextButton.innerHTML = '下一页';
+                    nextButton.disabled = (currentPage === totalPages);
+                    nextButton.addEventListener('click', () => {
+                        if (currentPage < totalPages) {
+                            currentPage++;
+                            changePage();
+                        }
+                    });
+                    container.appendChild(nextButton);
+                }
+
+                function createPageButton(container, pageNum) {
                     const button = document.createElement('button');
                     button.className = 'page-button';
-                    button.innerText = i;
-                    button.disabled = (i === currentPage);
+                    button.innerText = pageNum;
+                    button.disabled = (pageNum === currentPage);
                     button.addEventListener('click', () => {
-                        currentPage = i;
-                        renderPage(i);
-                        renderPagination();
+                        currentPage = pageNum;
+                        changePage();
                     });
-                    pagination.appendChild(button);
+                    container.appendChild(button);
                 }
+
+                createPaginationButtons(topPagination);
+                createPaginationButtons(bottomPagination);
+            }
+
+            function changePage() {
+                renderPage(currentPage);
+                renderPagination();
+                updatePageInfo();
             }
 
             function lazyLoad() {
@@ -144,15 +386,43 @@
                     if (img.src) return; // 如果已经加载过了就跳过
 
                     const imgTop = img.getBoundingClientRect().top + scrollY;
-                    if (windowHeight + scrollY > imgTop) {
+                    if (windowHeight + scrollY + 200 > imgTop) { // 提前200px开始加载
                         img.src = img.getAttribute('data-src');
                     }
                 });
             }
 
-            window.addEventListener('scroll', lazyLoad);
+            // 键盘快捷键支持
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft' && currentPage > 1) {
+                    currentPage--;
+                    changePage();
+                } else if (e.key === 'ArrowRight' && currentPage < totalPages) {
+                    currentPage++;
+                    changePage();
+                }
+            });
+
+            // 滚动隐藏顶栏功能
+            let lastScrollTop = 0;
+            const header = document.getElementById('header');
+            
+            window.addEventListener('scroll', () => {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                if (scrollTop > lastScrollTop && scrollTop > 100) {
+                    // 向下滚动且滚动距离超过100px时隐藏
+                    header.classList.add('hidden');
+                } else {
+                    // 向上滚动时显示
+                    header.classList.remove('hidden');
+                }
+                
+                lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // 防止负数
+                lazyLoad();
+            });
+
             window.addEventListener('resize', lazyLoad);
-            lazyLoad(); // 页面加载时初始化调用
 
             const globalBlur = document.getElementById('global-blur');
 
@@ -166,6 +436,8 @@
                 }
             });
 
+            // 初始化页面
+            updatePageInfo();
             renderPage(currentPage);
             renderPagination();
         });

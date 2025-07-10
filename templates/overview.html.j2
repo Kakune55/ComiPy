@@ -7,26 +7,38 @@
   <link href="/static/css/bootstrap.min.css" rel="stylesheet">
   <title>ComiPy-概览</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Google Sans', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
       margin: 0;
-      padding: 20px;
-      background-color: #f0f0f0;
+      padding: 0;
+      background-color: #f8f9fa;
+      min-height: 100vh;
+      color: #202124;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 16px;
     }
 
     #gallery {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      grid-gap: 20px;
-      font-size: small;
+      gap: 16px;
+      font-size: 14px;
     }
 
     /* 当屏幕宽度大于600px时，调整列数和列的宽度 */
     @media (min-width: 600px) {
       #gallery {
         grid-template-columns: repeat(3, 1fr);
-        font-size: medium;
-        /* 两列布局 */
+        font-size: 15px;
       }
     }
 
@@ -34,20 +46,57 @@
     @media (min-width: 900px) {
       #gallery {
         grid-template-columns: repeat(5, 1fr);
-        font-size: large;
-        /* 三列布局 */
+        font-size: 16px;
       }
     }
 
+    .gallery-item {
+      background: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
+      transition: box-shadow 0.2s ease;
+      cursor: pointer;
+    }
+
+    .gallery-item:hover {
+      box-shadow: 0 4px 8px rgba(60, 64, 67, 0.3);
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px 8px 0 0;
+    }
+
+    .gallery-item-content {
+      padding: 12px;
+    }
+
+    .gallery-item h3 {
+      margin: 0 0 8px 0;
+      font-size: 1em;
+      font-weight: 500;
+      color: #1a73e8;
+      text-decoration: none;
+    }
+
+    .gallery-item p {
+      margin: 0;
+      color: #5f6368;
+      font-size: 0.875em;
+    }
+
     #global-blur {
-      background-color: rgba(255, 255, 255, 0.5);
+      background-color: rgba(255, 255, 255, 0.95);
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       /* 模糊度可以根据需要调整 */
       transition: display;
       z-index: 10;
@@ -77,19 +126,21 @@
     </div>
   </div>
   <hr />
-  <div id="gallery">
-    {% for item in list %}
-    <div class="card">
-      {% if item[4] > aftertime %}
-      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">New</span>
-      {% endif %}
-      <img src="/api/img/{{ item[1] }}/0?mini=yes" class="img-thumbnail card-img-top"
-        onclick="linkjump('{{ item[1] }}')" />
-      <div class="card-body">
-        <p class="card-text">{{ item[2] }}</p>
+  <div class="container">
+    <div id="gallery">
+      {% for item in list %}
+      <div class="gallery-item" onclick="linkjump('{{ item[1] }}')">
+        {% if item[4] > aftertime %}
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">New</span>
+        {% endif %}
+        <img src="/api/img/{{ item[1] }}/0?mini=yes" alt="{{ item[2] }}" />
+        <div class="gallery-item-content">
+          <h3>{{ item[2] }}</h3>
+          <p>点击查看详情</p>
+        </div>
       </div>
+      {% endfor %}
     </div>
-    {% endfor %}
   </div>
   <hr />
   <div style=display:flex;justify-content:center;align-items:center;>

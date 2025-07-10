@@ -7,37 +7,55 @@
     <link href="/static/css/bootstrap.min.css" rel="stylesheet">
     <title>ComiPy-详情页面</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Google Sans', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
             margin: 0;
             padding: 0;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            color: #202124;
+            line-height: 1.6;
         }
 
         .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 16px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            margin-top: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
         }
 
         .header {
             display: flex;
-            justify-content: space-between;
             flex-direction: column;
-            width: 80%;
-            margin-top: 20px;
+            gap: 24px;
+            margin-bottom: 24px;
         }
 
         @media (min-width: 600px) {
             .header {
                 flex-direction: row;
+                align-items: flex-start;
             }
         }
 
-
-
         .movie-poster {
             flex: 1;
-            margin-right: 20px;
+            max-width: 300px;
+        }
+
+        .movie-poster img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
         }
 
         .movie-details {
@@ -45,28 +63,109 @@
         }
 
         .movie-details h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
+            font-size: 1.75rem;
+            font-weight: 400;
+            color: #1a73e8;
+            margin-bottom: 16px;
         }
 
         .movie-details p {
-            font-size: 16px;
-            margin-bottom: 10px;
+            font-size: 14px;
+            color: #5f6368;
+            margin-bottom: 12px;
+        }
+
+        .btn {
+            background: #1a73e8;
+            border: 1px solid #1a73e8;
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #1557b0;
+            border-color: #1557b0;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .btn-outline {
+            background: #ffffff;
+            border: 1px solid #dadce0;
+            color: #1a73e8;
+        }
+
+        .btn-outline:hover {
+            background: #f8f9fa;
+            border-color: #1a73e8;
+            color: #1a73e8;
         }
 
         .comments-section {
-            width: 80%;
-            margin-top: 20px;
+            margin-top: 32px;
+        }
+
+        .comments-section h2 {
+            color: #1a73e8;
+            font-weight: 400;
+            font-size: 1.25rem;
+            margin-bottom: 16px;
         }
 
         .comment {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-bottom: 10px;
+            background: #f8f9fa;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
         }
 
         .comment p {
             margin: 0;
+            color: #202124;
+        }
+
+        .comment-meta {
+            font-size: 12px;
+            color: #5f6368;
+            margin-top: 8px;
+        }
+
+        .form-control {
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            padding: 12px;
+            font-family: inherit;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+
+        .modal-content {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 4px 8px rgba(60, 64, 67, 0.3);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #dadce0;
+        }
+
+        .modal-title {
+            color: #1a73e8;
+            font-weight: 400;
         }
     </style>
 </head>

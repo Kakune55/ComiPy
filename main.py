@@ -1,7 +1,7 @@
 import app_conf
 import db.util
 import db.file, file
-from flask import *
+from flask import Flask
 
 from router.api_Img import api_Img_bp
 from router.page import page_bp
@@ -28,6 +28,6 @@ if __name__ == "__main__":
     app.run(
         debug=conf.getboolean("server", "debug"),
         host=conf.get("server", "host"),
-        port=conf.get("server", "port"),
+        port=int(conf.get("server", "port")),
         threaded=conf.getboolean("server", "threaded"),
     )

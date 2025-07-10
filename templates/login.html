@@ -5,49 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ComiPy-登录</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            font-family: 'Google Sans', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8f9fa;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            color: #202124;
+            line-height: 1.6;
         }
 
         .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            padding: 32px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1a73e8;
+            font-weight: 400;
+            margin-bottom: 24px;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 16px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            color: #202124;
+            font-weight: 500;
+            font-size: 14px;
         }
 
         .form-group input {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            box-sizing: border-box;
+            padding: 12px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
         }
 
         .form-group button {
             width: 100%;
-            padding: 10px;
-            background-color: #5cb85c;
-            border: none;
-            border-radius: 3px;
-            color: white;
+            padding: 12px;
+            background: #1a73e8;
+            border: 1px solid #1a73e8;
+            border-radius: 4px;
+            color: #ffffff;
             cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
         }
+
+        .form-group button:hover {
+            background: #1557b0;
+            border-color: #1557b0;
+        }
+    </style>
 
         .form-group button:hover {
             background-color: #4cae4c;
