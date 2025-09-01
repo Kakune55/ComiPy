@@ -102,6 +102,10 @@
             align-items: center;
             gap: 8px;
             margin: 16px 0;
+            padding: 0 8px;                 /* 给两侧留白，避免被屏幕边缘贴边或裁剪 */
+            box-sizing: border-box;
+            scroll-padding-inline: 12px;     /* 滚动对齐时保留左右内边距 */
+            scrollbar-gutter: stable both-edges; /* 预留滚动条空间，避免内容被遮挡 */
         }
 
         .page-button {
@@ -116,6 +120,8 @@
             transition: all 0.2s ease;
             min-width: 36px;
             font-family: inherit;
+            white-space: nowrap; /* 防止中文自动换行成竖排 */
+            flex: 0 0 auto;      /* 在可横向滚动容器中保持宽度，不被压缩 */
         }
 
         .page-button:hover:not(:disabled) {
@@ -140,6 +146,7 @@
             border-color: #1a73e8;
             padding: 8px 24px;
             font-size: 14px;
+            min-width: 88px; /* 桌面端保证能容纳“上一页/下一页” */
         }
 
         .page-button.nav-button:hover:not(:disabled) {
@@ -161,6 +168,29 @@
             cursor: default;
             color: #5f6368;
             font-weight: 400;
+        }
+
+        .page-jump {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: 8px;
+            flex: 0 0 auto; /* 避免被压缩导致输入框过小 */
+        }
+
+        .page-input {
+            width: 84px;
+            padding: 7px 8px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .page-input:focus {
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.15);
         }
 
         .loading-placeholder {
@@ -201,19 +231,73 @@
             
             .container {
                 margin: 8px;
-                padding: 16px 12px;
+                padding: 12px 10px;
             }
             
             .page-button {
-                padding: 6px 12px;
+                padding: 8px 12px; /* 提高触摸目标尺寸 */
                 font-size: 13px;
                 min-width: 32px;
             }
             
             .page-button.nav-button {
-                padding: 6px 16px;
+                padding: 8px 16px;
+                font-size: 13px;
+                min-width: 72px; /* 移动端最小宽度，避免断行 */
+            }
+
+            .page-input {
+                width: 72px;
+                padding: 6px 8px;
                 font-size: 13px;
             }
+            /* 小屏分页支持横向滚动，减少换行高度 */
+            .pagination-container {
+                flex-wrap: nowrap;
+                justify-content: flex-start;     /* 小屏靠左对齐，避免左侧被裁剪 */
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+                gap: 6px;
+                padding: 0 12px;                /* 左右更充足的可视留白 */
+                scroll-padding-inline: 12px;     /* 小屏滚动对齐保留内边距 */
+                overscroll-behavior-x: contain;  /* 避免横向滚动影响页面整体 */
+            }
+            .pagination-container::-webkit-scrollbar { height: 6px; }
+            .pagination-container::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 3px; }
+        }
+
+        /* 移动端悬浮操作按钮（FAB） */
+        .mobile-fabs {
+            position: fixed;
+            right: 12px;
+            bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+            display: none; /* 桌面端隐藏 */
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1100;
+        }
+        .mobile-fabs .fab {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid #dadce0;
+            background: #ffffff;
+            color: #1a73e8;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(60,64,67,.3);
+            cursor: pointer;
+            user-select: none;
+            font-size: 18px;
+        }
+        .mobile-fabs .fab:disabled {
+            color: #9aa0a6;
+            border-color: #e0e0e0;
+        }
+        @media (max-width: 768px) {
+            .mobile-fabs { display: inline-flex; }
         }
     </style>
 </head>
@@ -228,6 +312,12 @@
         <div id="comic-container"></div>
         <div class="pagination-container" id="bottom-pagination"></div>
     </div>
+    <!-- 移动端悬浮操作按钮：上一页、下一页、回到顶部 -->
+    <div class="mobile-fabs" aria-label="阅读操作" id="mobile-fabs" role="toolbar">
+        <button class="fab" id="fab-prev" title="上一页" aria-label="上一页">⟨</button>
+        <button class="fab" id="fab-next" title="下一页" aria-label="下一页">⟩</button>
+        <button class="fab" id="fab-top" title="回到顶部" aria-label="回到顶部">↑</button>
+    </div>
     
     <div id="global-blur" onclick="unshowGlobalBlur()"></div>
     <script>
@@ -238,8 +328,13 @@
                 {% endfor %}
             ];
             const itemsPerPage = 25; // 每页显示的图片数量
-            let currentPage = 1;
+            let currentPage = 1; // 逻辑分页（每25张图为一页）
             const totalPages = Math.ceil(imgsData.length / itemsPerPage);
+            const contentId = "{{ id }}";
+            const storageKey = `ComiPy:reader:${contentId}`;
+            let ignoreHashChange = false; // 避免程序更新 hash 触发重复处理
+            let pendingScrollSave = null; // 节流保存滚动位置
+            let lastVisibleImageIndex = 0; // 记录当前页内大致位置（第几张图）
 
             function renderPage(page) {
                 const comicContainer = document.getElementById('comic-container');
@@ -260,12 +355,25 @@
                         img.className = 'imgs comic-image loading-placeholder';
                         img.setAttribute('data-src', item.src);
                         img.setAttribute('alt', item.alt);
+                        img.setAttribute('loading', 'lazy');
+                        img.setAttribute('decoding', 'async');
+                        img.setAttribute('fetchpriority', 'low');
                         img.onload = () => img.classList.remove('loading-placeholder');
                         comicContainer.appendChild(img);
                     });
 
-                    window.scrollTo({ top: 0, behavior: 'smooth' }); // 平滑滚动到页面顶部
-                    lazyLoad(); // 确保惰性加载生效
+                    // 优先恢复页内滚动位置，否则回到顶部
+                    const saved = loadReadingState();
+                    if (saved && saved.page === currentPage && typeof saved.inPageIndex === 'number') {
+                        // 等待下一帧，确保元素渲染后再滚动
+                        requestAnimationFrame(() => {
+                            scrollToImage(saved.inPageIndex);
+                            lazyLoad(); // 确保惰性加载生效
+                        });
+                    } else {
+                        window.scrollTo({ top: 0, behavior: 'smooth' }); // 平滑滚动到页面顶部
+                        lazyLoad(); // 确保惰性加载生效
+                    }
                 }, 300);
             }
 
@@ -297,6 +405,8 @@
 
                 // 创建分页按钮
                 function createPaginationButtons(container) {
+                    const isMobile = window.innerWidth <= 768;
+                    const pageWindow = isMobile ? 1 : 2; // 手机端收窄页码窗口
                     // 上一页按钮
                     const prevButton = document.createElement('button');
                     prevButton.className = 'page-button nav-button';
@@ -311,8 +421,8 @@
                     container.appendChild(prevButton);
 
                     // 页码按钮
-                    const startPage = Math.max(1, currentPage - 2);
-                    const endPage = Math.min(totalPages, currentPage + 2);
+                    const startPage = Math.max(1, currentPage - pageWindow);
+                    const endPage = Math.min(totalPages, currentPage + pageWindow);
 
                     // 第一页
                     if (startPage > 1) {
@@ -353,6 +463,41 @@
                         }
                     });
                     container.appendChild(nextButton);
+
+                    // 跳转控件
+                    const jumpWrap = document.createElement('span');
+                    jumpWrap.className = 'page-jump';
+
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.min = '1';
+                    input.max = String(totalPages);
+                    input.placeholder = `跳转 1-${totalPages}`;
+                    input.className = 'page-input';
+                    input.value = String(currentPage);
+
+                    const goBtn = document.createElement('button');
+                    goBtn.className = 'page-button';
+                    goBtn.textContent = '跳转';
+
+                    function doJump() {
+                        let val = parseInt(input.value, 10);
+                        if (isNaN(val)) return;
+                        val = Math.max(1, Math.min(totalPages, val));
+                        if (val !== currentPage) {
+                            currentPage = val;
+                            changePage();
+                        }
+                    }
+
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') doJump();
+                    });
+                    goBtn.addEventListener('click', doJump);
+
+                    jumpWrap.appendChild(input);
+                    jumpWrap.appendChild(goBtn);
+                    container.appendChild(jumpWrap);
                 }
 
                 function createPageButton(container, pageNum) {
@@ -369,12 +514,16 @@
 
                 createPaginationButtons(topPagination);
                 createPaginationButtons(bottomPagination);
+                centerActivePageButtons();
             }
 
             function changePage() {
                 renderPage(currentPage);
                 renderPagination();
                 updatePageInfo();
+                saveReadingState();
+                updateURLHash(currentPage);
+                centerActivePageButtons();
             }
 
             function lazyLoad() {
@@ -419,10 +568,85 @@
                 }
                 
                 lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // 防止负数
+                // 记录页内可见图片索引并惰性加载
+                updateVisibleImageIndex();
                 lazyLoad();
             });
 
             window.addEventListener('resize', lazyLoad);
+            
+        function centerActivePageButtons() {
+                const containers = [
+                    document.getElementById('top-pagination'),
+                    document.getElementById('bottom-pagination')
+                ];
+                containers.forEach((c) => {
+                    if (!c) return;
+                    const active = c.querySelector('.page-button[disabled]');
+                    if (!active) return;
+            // 仅在容器可横向滚动时执行
+            if (c.scrollWidth <= c.clientWidth) return;
+            // 计算按钮相对容器的中心偏移，使用 scrollLeft 精确定位
+                    const containerCenter = c.clientWidth / 2;
+                    const activeCenter = active.offsetLeft + active.offsetWidth / 2;
+                    let targetScrollLeft = activeCenter - containerCenter;
+                    const maxScroll = c.scrollWidth - c.clientWidth;
+                    const padding = 8; // 与容器左右 padding 保持一致
+                    targetScrollLeft = Math.max(0, Math.min(maxScroll, targetScrollLeft));
+                    // 保证左侧留有可视 padding，不至于看起来被切掉
+                    if (targetScrollLeft < padding) targetScrollLeft = 0;
+                    c.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
+                });
+            }
+
+            // 移动端悬浮按钮事件
+            const fabPrev = document.getElementById('fab-prev');
+            const fabNext = document.getElementById('fab-next');
+            const fabTop = document.getElementById('fab-top');
+            if (fabPrev && fabNext && fabTop) {
+                fabPrev.addEventListener('click', () => {
+                    if (currentPage > 1) { currentPage--; changePage(); }
+                });
+                fabNext.addEventListener('click', () => {
+                    if (currentPage < totalPages) { currentPage++; changePage(); }
+                });
+                fabTop.addEventListener('click', () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+
+            function updateFabs() {
+                if (!fabPrev || !fabNext) return;
+                fabPrev.disabled = (currentPage === 1);
+                fabNext.disabled = (currentPage === totalPages);
+            }
+
+            // 简单左右滑动切页（阈值：水平>60px 且 垂直<30px）
+            let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
+            const swipeEl = document.getElementById('comic-container');
+            if (swipeEl) {
+                swipeEl.addEventListener('touchstart', (e) => {
+                    const t = e.changedTouches[0];
+                    touchStartX = t.clientX;
+                    touchStartY = t.clientY;
+                    touchStartTime = Date.now();
+                }, { passive: true });
+                swipeEl.addEventListener('touchend', (e) => {
+                    const t = e.changedTouches[0];
+                    const dx = t.clientX - touchStartX;
+                    const dy = Math.abs(t.clientY - touchStartY);
+                    const dt = Date.now() - touchStartTime;
+                    if (dt < 600 && Math.abs(dx) > 60 && dy < 30) {
+                        if (dx < 0 && currentPage < totalPages) { // 向左滑 -> 下一页
+                            currentPage++;
+                            changePage();
+                        } else if (dx > 0 && currentPage > 1) { // 向右滑 -> 上一页
+                            currentPage--;
+                            changePage();
+                        }
+                    }
+                }, { passive: true });
+            }
 
             const globalBlur = document.getElementById('global-blur');
 
@@ -436,10 +660,105 @@
                 }
             });
 
-            // 初始化页面
-            updatePageInfo();
-            renderPage(currentPage);
-            renderPagination();
+            // --- 位置记忆 & URL 同步 ---
+            function saveReadingState() {
+                const state = {
+                    page: currentPage,
+                    inPageIndex: lastVisibleImageIndex
+                };
+                try {
+                    localStorage.setItem(storageKey, JSON.stringify(state));
+                } catch (_) {}
+            }
+
+            function loadReadingState() {
+                try {
+                    const raw = localStorage.getItem(storageKey);
+                    return raw ? JSON.parse(raw) : null;
+                } catch (_) { return null; }
+            }
+
+            function parsePageFromURL() {
+                // 1) hash: #p=3 或 #page=3
+                const hash = (location.hash || '').replace(/^#/, '');
+                const hashParams = new URLSearchParams(hash.includes('=') ? hash : `p=${hash}`);
+                let p = parseInt(hashParams.get('p') || hashParams.get('page') || '', 10);
+                if (!isNaN(p)) return p;
+                // 2) search: ?p=3 或 ?page=3
+                const sp = new URLSearchParams(location.search);
+                p = parseInt(sp.get('p') || sp.get('page') || '', 10);
+                return isNaN(p) ? null : p;
+            }
+
+            function updateURLHash(page) {
+                // 使用 hash 避免后端路由干扰
+                const newHash = `p=${page}`;
+                if (location.hash !== `#${newHash}`) {
+                    ignoreHashChange = true;
+                    location.hash = newHash;
+                    // 短暂忽略这次 hashchange 事件
+                    setTimeout(() => { ignoreHashChange = false; }, 50);
+                }
+            }
+
+            window.addEventListener('hashchange', () => {
+                if (ignoreHashChange) return;
+                const p = parsePageFromURL();
+                if (typeof p === 'number' && p >= 1 && p <= totalPages && p !== currentPage) {
+                    currentPage = p;
+                    changePage();
+                }
+            });
+
+            function scrollToImage(inPageIdx) {
+                const imgs = document.querySelectorAll('#comic-container .imgs');
+                if (!imgs.length) return;
+                const idx = Math.max(0, Math.min(imgs.length - 1, inPageIdx | 0));
+                const el = imgs[idx];
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+
+            function updateVisibleImageIndex() {
+                const imgs = document.querySelectorAll('#comic-container .imgs');
+                if (!imgs.length) return;
+                const scrollY = window.scrollY || window.pageYOffset;
+                let idx = 0;
+                for (let i = 0; i < imgs.length; i++) {
+                    const rect = imgs[i].getBoundingClientRect();
+                    const top = rect.top + scrollY;
+                    if (top - scrollY >= -50) { // 视口附近的第一张
+                        idx = i;
+                        break;
+                    }
+                }
+                lastVisibleImageIndex = idx;
+                // 节流保存
+                if (pendingScrollSave) clearTimeout(pendingScrollSave);
+                pendingScrollSave = setTimeout(saveReadingState, 400);
+            }
+
+            window.addEventListener('scroll', () => {
+                updateVisibleImageIndex();
+            }, { passive: true });
+
+            // 初始化页面：从 URL 或本地存储恢复
+            (function init() {
+                let initialPage = parsePageFromURL();
+                const saved = loadReadingState();
+                if (!initialPage && saved && typeof saved.page === 'number') {
+                    initialPage = saved.page;
+                }
+                if (typeof initialPage === 'number') {
+                    currentPage = Math.max(1, Math.min(totalPages, initialPage));
+                }
+                updatePageInfo();
+                renderPage(currentPage);
+                renderPagination();
+                updateURLHash(currentPage);
+                updateFabs();
+            })();
         });
 
         function unshowGlobalBlur() {

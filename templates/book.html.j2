@@ -213,6 +213,7 @@
                 <h3>更新时间: {{time}}</h3>
                 <h2>👍{{socre["like"]}} 👎{{socre["dislike"]}}</h2>
                 <button class="btn btn-primary" onclick="window.location.href='/view/{{ id }}'">在线浏览</button>
+                <button class="btn btn-outline" id="continue-read">继续阅读</button>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">撰写评论</button>
                 {%if islogin == "admin"%}
                 <button class="btn btn-danger">删除资源</button>
@@ -277,6 +278,33 @@
                     alert('请求失败：' + error.message);
                 });
         }
+
+        // 继续阅读：依据本地存储定位到上次分页
+    (function setupContinueRead(){
+            const btn = document.getElementById('continue-read');
+            if(!btn) return;
+            const key = `ComiPy:reader:{{ id }}`;
+            let state = null;
+            try {
+                const raw = localStorage.getItem(key);
+                state = raw ? JSON.parse(raw) : null;
+            } catch(_) {}
+
+            if(!state || !state.page){
+                btn.title = '尚无阅读记录';
+        // 保持原文案“继续阅读”
+            } else {
+                btn.title = `上次阅读到第 ${state.page} 页`;
+        btn.textContent = `继续阅读 第 ${state.page} 页`;
+            }
+            btn.addEventListener('click', function(){
+                if(state && state.page){
+                    window.location.href = `/view/{{ id }}#p=${state.page}`;
+                } else {
+                    window.location.href = `/view/{{ id }}`;
+                }
+            });
+        })();
     </script>
 
 </body>
